@@ -1,0 +1,8 @@
+PKG_NAME="test-package"
+PKG_PRETTY="Test Package"
+PKG_DESC="This is a test package for the Shellton build system"
+PKG_URL="https://liradevices.com/notavalidlink.git"
+PKG_VER="1.0"
+PKG_DEPENDS=""
+
+FLAG_APPIMAGE=1
