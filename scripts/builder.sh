@@ -58,17 +58,17 @@ if [ -v DEV_DEBUG ]; then
     echo "-------------"
 fi
     
-if [ -v "$FLAG_OOD" ]; then
+if [ -v FLAG_OOD ]; then
     err_msg "Package flagged Out of Date!"
     exit 1
 fi
 
-if [ -v "$FLAG_BROKEN" ]; then
+if [ -v FLAG_BROKEN ]; then
     err_msg "Packaged flagged as broken!"
     exit 1
 fi
 
-if [ -v "$FLAG_DEPRICATED" ]; then
+if [ -v FLAG_DEPRICATED ]; then
     err_msg "Package has been depricated. Skipping..."
     exit 1
 fi
@@ -103,9 +103,9 @@ SRC_PATH="${SRC_CACHEDIR}/${SRC_ARCHIVE}"
 
 if [ ! -f "$SRC_PATH" ]; then
     # Check what kind of distribution the package comes as
-    if [ -v "$FLAG_APPIMAGE" ]; then
+    if [ -v FLAG_APPIMAGE ]; then
 	yes_msg "Fetching latest AppImage"
-    elif [ -v "$FLAG_PREPACKAGED" ]; then
+    elif [ -v FLAG_PREPACKAGED ]; then
 	yes_msg "Fetching tarball/package..."
     else
 	yes_msg "Fetching source..."
@@ -121,7 +121,7 @@ fi
 
 # If AppImage, then just move to final step
 
-if [ -v "$FLAG_APPIMAGE" ]; then
+if [ -v FLAG_APPIMAGE ]; then
     yes_msg "Moving AppImage to output directory..."
     cp "$SRC_PATH" "${REPO_POOL}/${PKG_FULLNAME}.AppImage"
     exit 0
