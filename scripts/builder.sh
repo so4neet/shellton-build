@@ -56,7 +56,8 @@ if [ -v "$DEV_DEBUG" ]; then
     echo $VER
     echo $PKG_NAME
     echo -------------
-
+fi
+    
 if [ -v "$FLAG_OOD" ]; then
     err_msg "Package flagged Out of Date!"
     exit 1
