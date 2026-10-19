@@ -131,6 +131,6 @@ if [ -v FLAG_APPIMAGE ]; then
     echo "PKG_CHKSUM=$(sha256sum $SRC_PATH | head -c 64)" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
     yes_msg "Compressing Bundle..."
     tar -czf "${REPO_POOL}/${PKG_FULLNAME}.bundle" "$SRC_PATH" "${PKG_WORK_DIR}/${PKG_NAME}.meta"
-    cp "${REPO_POOL}/${PKG_FULLNANME}.bundle" "${REPO_POOL}/${PKG_FULLNAME}.bundle"
+    cp "${REPO_POOL}/${PKG_FULLNAME}.bundle" "${REPO_POOL}/${PKG_FULLNAME}.bundle"
     exit 0
 fi
