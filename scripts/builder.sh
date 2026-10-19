@@ -50,8 +50,8 @@ source "$SHELLTON_PATH"
 # Check for critical flags
 
 # Check for debug mode
-if [ -v "$DEV_DEBUG" ]; then
-    echo "-------------"
+if [ -v DEV_DEBUG ]; then
+    echo "----DEBUG----"
     echo "$PKG_URL"
     echo "$VER"
     echo "$PKG_NAME"

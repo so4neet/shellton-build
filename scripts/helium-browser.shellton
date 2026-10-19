@@ -1,7 +1,7 @@
 PKG_NAME="helium-browser"
 PKG_PRETTY="Helium"
 PKG_DESC="Private, fast, and honest web browser"
-PKG_VER="0.19.4"
+PKG_VER="0.19.4.1"
 PKG_URL="https://github.com/imputnet/helium-linux/releases/download/${PKG_VER}/helium-${PKG_VER}-x86_64.AppImage"
 
 FLAG_APPIMAGE="y"
