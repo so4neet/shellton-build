@@ -51,11 +51,11 @@ source "$SHELLTON_PATH"
 
 # Check for debug mode
 if [ -v "$DEV_DEBUG" ]; then
-    echo -------------
-    echo $PKG_URL
-    echo $VER
-    echo $PKG_NAME
-    echo -------------
+    echo "-------------"
+    echo "$PKG_URL"
+    echo "$VER"
+    echo "$PKG_NAME"
+    echo "-------------"
 fi
     
 if [ -v "$FLAG_OOD" ]; then

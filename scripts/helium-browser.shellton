@@ -5,3 +5,4 @@ PKG_VER="0.19.4"
 PKG_URL="https://github.com/imputnet/helium-linux/releases/download/${PKG_VER}/helium-${PKG_VER}-x86_64.AppImage"
 
 FLAG_APPIMAGE="y"
+DEV_DEBUG="y"
