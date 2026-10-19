@@ -49,6 +49,14 @@ source "$SHELLTON_PATH"
 
 # Check for critical flags
 
+# Check for debug mode
+if [ -v "$DEV_DEBUG" ]; then
+    echo -------------
+    echo $PKG_URL
+    echo $VER
+    echo $PKG_NAME
+    echo -------------
+
 if [ -v "$FLAG_OOD" ]; then
     err_msg "Package flagged Out of Date!"
     exit 1
