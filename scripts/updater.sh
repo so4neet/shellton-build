@@ -6,15 +6,8 @@ source "$1"
 
 if declare -F update >/dev/null; then
     echo "Checking $PKG_NAME for updates..."
-    echo "Set ST_PATH= $1"
     ST_PATH="$1"
     echo "DEBUG:: Checking for package built in repo"
-    if compgen -G "/srv/shellton/repository/final"/*"$PKG_NAME"*/ > /dev/null; then
-	echo "DEBUG:: No Package!!!"
-	FLAG_OOD=1
-    else
-	echo "DEBUG:: Found Package!!!"
-    fi
     
     update
     if [ -v "$FLAG_OOD" ]; then

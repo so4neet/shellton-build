@@ -43,6 +43,11 @@ while IFS= read -r file; do
     if [ $ec -eq 10 ]; then
 	echo "No updates for [ $tmp_pkg_name ], skipping..."
     fi
+    if [ -d "${REPO_LOCATION}/.FORCEBUILD" ]; then
+	echo "!! Force Build Enabled, building all packages !!"
+	echo "${file}" >> "${REPO_LOCATION}/.UPDATE_QUEUE"
+    fi
+    
 done < <(find "${REPO_LOCATION}" -type f -name "*.shellton")
 
 echo "Finished checking packages, running build queue..."
