@@ -43,7 +43,7 @@ while IFS= read -r file; do
     if [ $ec -eq 10 ]; then
 	echo "No updates for [ $tmp_pkg_name ], skipping..."
     fi
-    if [ -d "${REPO_LOCATION}/.FORCEBUILD" ]; then
+    if [ -f "${REPO_LOCATION}/.FORCEBUILD" ]; then
 	echo "!! Force Build Enabled, building all packages !!"
 	echo "${file}" >> "${REPO_LOCATION}/.UPDATE_QUEUE"
     fi
