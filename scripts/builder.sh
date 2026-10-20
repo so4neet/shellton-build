@@ -91,7 +91,7 @@ yes_msg "Starting build for '${PKG_FULLNAME}'..."
 
 # Check if any dependencies need to be installed
 
-if [ -v "${BUILD_DEPENDS:-}" ]; then
+if [ -n "${BUILD_DEPENDS:-}" ]; then
     yes_msg "Build server requires dependencies:"
     pacman -S --needed --noconfirm ${BUILD_DEPENDS}
 fi
