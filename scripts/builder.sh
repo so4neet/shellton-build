@@ -149,4 +149,15 @@ fi
 
 if [ -v FLAG_SYSPACKAGE ]; then
     yes_msg "Building $PKG_NAME..."
-    cp "$SRC_PATH" "$PKG_WORK_DIR
+    cd "$SRC_PATH"
+    build
+    BLD_PASS=$?
+    if [ $BLD_PASS -ne 0 ]; then
+	err_msg "Build failed! Adding to fail_reports.txt"
+	echo "[ X ] - $PKG_NAME - $(date '+$Y/%m/%d %-I:%M%P %Z')"
+    else
+	yes_msg "Build succeeded!"
+    fi
+fi
+
+    
