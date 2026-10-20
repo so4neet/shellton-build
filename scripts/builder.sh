@@ -93,7 +93,7 @@ yes_msg "Starting build for '${PKG_FULLNAME}'..."
 
 if [ -n "${BUILD_DEPENDS:-}" ]; then
     yes_msg "Build server requires dependencies:"
-    pacman -S --needed --noconfirm ${BUILD_DEPENDS}
+    pacman -Sy --needed --noconfirm ${BUILD_DEPENDS}
 fi
 
 # Fetch source & cache it
