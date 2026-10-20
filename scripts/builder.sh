@@ -101,7 +101,7 @@ fi
 SRC_ARCHIVE="$(basename "$PKG_URL")"
 SRC_PATH="${SRC_CACHEDIR}/${SRC_ARCHIVE}"
 
-if [ ! -d "$SRC_PATH" ] || [ ! -f "$SRC_PATH" ]; then
+if [ ! -d "$SRC_PATH" ]; then
     # Check what kind of distribution the package comes as
     if [ -v FLAG_APPIMAGE ]; then
 	yes_msg "Fetching latest AppImage"
@@ -158,6 +158,21 @@ if [ -v FLAG_SYSPACKAGE ]; then
     else
 	yes_msg "Build succeeded!"
     fi
+
+    # If FLAG_SYSPACKAGE_INSTALL_ROOT, then package as such
+    if [ -v FLAG_SYSPACKAGE_INSTALL_ROOT ]; then
+	echo "FLAG_SYSPACKAGE_INSTALL_ROOT" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
+    fi
+    
+    echo "PKG_NAME=$PKG_NAME" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
+    echo "PKG_PRETTY=$PKG_PRETTY" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
+    echo "PKG_DESC=$PKG_DESC" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
+    echo "PKG_VER=$PKG_VER" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
+    echo "PKG_CHKSUM=WIP" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
+    yes_msg "Compressing Syspackage..."
+    tar -czf "${PKG_WORK_DIR}/${PKG_FULLNAME}.syspackage" -C "$(dirname "$PKG_WORK_DIR")" "${PKG_DEST_DIR}" -C "$PKG_WORK_DIR" "$(PKG_NAME).meta"
+    cp "${PKG_WORK_DIR}/${PKG_FULLNAME}.syspackage" "${REPO_POOL}/${PKG_FULLNAME}.syspackage"
+    exit 0
 fi
 
     
