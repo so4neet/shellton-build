@@ -116,15 +116,13 @@ if [ ! -d "$SRC_PATH" ]; then
     fi
     if [ -v FLAG_APPIMAGE ] || [ -v FLAG_PREPACKAGED ]; then
 	curl -L -o "$SRC_PATH" "$PKG_URL"
-    elif [ -v FLAG_SYSPACKAGE ] || [ -v FLAG_NOT_BUNDLEABLE ]; then
+    elif [ -v FLAG_GIT ] || [ -v FLAG_NOT_BUNDLEABLE ]; then
 	git clone "$PKG_URL" "$SRC_PATH"
     elif [ -v FLAG_BROKEN ]; then
 	err_msg "This package has been marked as broken. Please investigate."
     elif [ -v FLAG_DEPRICATED ]; then
 	err_msg "This package has been marked as depricated. Shellton can be maintained as long as package is safe and can be built."
-    fi
-    
-    
+    fi    
 else
     yes_msg "Using cached: $SRC_ARCHIVE"
 fi
@@ -144,6 +142,16 @@ if [ -v FLAG_APPIMAGE ]; then
     cp "${PKG_WORK_DIR}/${PKG_FULLNAME}.bundle" "${REPO_POOL}/${PKG_FULLNAME}.bundle"
     exit 0
 fi
+
+# If pre-packaged, extract
+
+if [ -v FLAG_PREPACKAGED ]; then
+    yes_msg "Extracting packaged source..."
+    tar -xvzf "$SRC_PATH" "${SRC_PATH}.dir"
+    rm -f "$SRC_PATH"
+    mv "${SRC_PATH}.dir" "$SRC_PATH"
+fi
+
 
 # If SYSPACKAGE, build
 
