@@ -147,7 +147,8 @@ fi
 
 if [ -v FLAG_PREPACKAGED ]; then
     yes_msg "Extracting packaged source..."
-    tar -xvzf "$SRC_PATH" "${SRC_PATH}.dir"
+    mkdir "${SRC_PATH}.dir"
+    tar -xvzf "$SRC_PATH" -C "${SRC_PATH}.dir"
     rm -f "$SRC_PATH"
     mv "${SRC_PATH}.dir" "$SRC_PATH"
 fi
