@@ -101,7 +101,7 @@ fi
 SRC_ARCHIVE="$(basename "$PKG_URL")"
 SRC_PATH="${SRC_CACHEDIR}/${SRC_ARCHIVE}"
 
-if [ ! -f "$SRC_PATH" ]; then
+if [ ! -d "$SRC_PATH" ] || [ ! -f "$SRC_PATH" ]; then
     # Check what kind of distribution the package comes as
     if [ -v FLAG_APPIMAGE ]; then
 	yes_msg "Fetching latest AppImage"
@@ -117,7 +117,7 @@ if [ ! -f "$SRC_PATH" ]; then
     if [ -v FLAG_APPIMAGE ] || [ -v FLAG_PREPACKAGED ]; then
 	curl -L -o "$SRC_PATH" "$PKG_URL"
     elif [ -v FLAG_SYSPACKAGE ] || [ -v FLAG_NOT_BUNDLEABLE ]; then
-	git clone "$PKG_URL" "{$SRC_PATH}"
+	git clone "$PKG_URL" "$SRC_PATH"
     elif [ -v FLAG_BROKEN ]; then
 	err_msg "This package has been marked as broken. Please investigate."
     elif [ -v FLAG_DEPRICATED ]; then
