@@ -170,7 +170,7 @@ if [ -v FLAG_SYSPACKAGE ]; then
     echo "PKG_VER=$PKG_VER" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
     echo "PKG_CHKSUM=WIP" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
     yes_msg "Compressing Syspackage..."
-    tar -czf "${PKG_WORK_DIR}/${PKG_FULLNAME}.syspackage" -C "$(dirname "$PKG_WORK_DIR")" "${PKG_DEST_DIR}" -C "$PKG_WORK_DIR" "$(PKG_NAME).meta"
+    tar -czf "${PKG_WORK_DIR}/${PKG_FULLNAME}.syspackage" -C "$(dirname "$PKG_WORK_DIR")" "${PKG_DEST_DIR}" -C "$PKG_WORK_DIR" "${PKG_NAME}.meta"
     cp "${PKG_WORK_DIR}/${PKG_FULLNAME}.syspackage" "${REPO_POOL}/${PKG_FULLNAME}.syspackage"
     exit 0
 fi
