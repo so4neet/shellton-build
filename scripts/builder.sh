@@ -11,10 +11,11 @@ yes_msg() {
 
 # Grab root perms so we can fetch whatever deps we need from pacman
 
-if [ "$EUID" -ne 0 ]; then
-    echo "Escalating to root..."
-    exec sudo bash "$(realpath "$0")" "$@"
-fi
+#if [ "$EUID" -ne 0 ]; then
+#    PREV_USER="$(whoami)"
+#    echo "Escalating to root..."
+#    exec sudo bash "$(realpath "$0")" "$@"
+#fi
 
 set -eo pipefail
 
@@ -93,7 +94,7 @@ yes_msg "Starting build for '${PKG_FULLNAME}'..."
 
 if [ -n "${BUILD_DEPENDS:-}" ]; then
     yes_msg "Build server requires dependencies:"
-    pacman -Sy --needed --noconfirm ${BUILD_DEPENDS}
+    sudo pacman -Sy --needed --noconfirm ${BUILD_DEPENDS}
 fi
 
 # Fetch source & cache it
