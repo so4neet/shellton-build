@@ -149,6 +149,12 @@ else
     yes_msg "Using cached: $SRC_ARCHIVE"
 fi
 
+if [ -f "${REPO_POOL}/${PKG_FULLNAME}.bundle" ] || [ -f "${REPO_POOL}/${PKG_FULLNAME}.syspackage" ]; then
+    yes_msg "Package already built/bundled, skipping..."
+    exit 0
+fi
+
+
 # If AppImage, then just move to final step
 
 if [ -v FLAG_APPIMAGE ]; then
