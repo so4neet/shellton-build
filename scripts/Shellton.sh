@@ -10,11 +10,11 @@ PKGCOUNT=0
 
 cd "$REPO_LOCATION"
 
-read -p "Clear update queue? (y\n)" yn
+read -p "Clear build queue? (y\n)" yn
 
 case $yn in
     [yY] )
-	rm -f "${REPO_LOCATION}/.UPDATE_QUEUE"
+	rm -f "${REPO_LOCATION}/.BLD_QUEUE"
 	;;
     [nN] )
 	;;
@@ -56,5 +56,9 @@ done < <(find "${REPO_LOCATION}" -type f -name "*.shellton")
 echo "Finished checking packages, running build queue..."
 
 while IFS= read -r buildjob; do
+    echo "_________________________________________"
+    echo "$buildjob"
+    echo "_________________________________________"
+    echo ""
     bash ${SHELLTON_LOCATION}/builder.sh "$buildjob"
 done < "${REPO_LOCATION}/.BLD_QUEUE"
