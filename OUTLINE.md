@@ -1,5 +1,11 @@
 # Outline of the Shellton Build System
 
+## Repositories
+
+First, clone or create a repository, then place a `shellton.repo` file in the `repos` folder containing the filepath.
+
+## Building
+
 One central application manages the building of packages, checking for updates, and ensuring that builds function.
 
 Each package is denoted through a Shellton file, <pkg-name>.shellton. This contains metadata about the package that tells the build system how to build it.
@@ -33,8 +39,10 @@ There are a couple extra flags that are useful for the LiraOS Package Manager.
 
 ```
 FLAG_APPIMAGE
+FLAG_GIT
 FLAG_PREPACKAGED
 FLAG_SYSPACKAGE
+FLAG_SYSPACKAGE_INSTALL_ROOT
 FLAG_NOT_BUNDLEABLE
 FLAG_OOD
 FLAG_BROKEN
@@ -45,7 +53,11 @@ FLAG_DEPRICATED
 
 `FLAG_PREPACKAGED` denotes that the package is distributed as a Binary or tarball by the developer and does not need to be built.
 
+`FLAG_GIT` denotes that the package is an upstream Git repository. 
+
 `FLAG_SYSPACKAGE` denotes that the package is a core system package necessary for the system to be functional. These typically have their own specific packaging steps.
+
+`FLAG_SYSPACKAGE_INSTALL_ROOT` denotes that the package should be installed directly to the root folder with root permissions.
 
 `FLAG_NOT_BUNDLEABLE` denotes that the package cannot be bundled with its dependencies.
 
