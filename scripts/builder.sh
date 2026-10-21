@@ -1,5 +1,15 @@
 #!/usr/bin/env bash
 
+
+init_timestamp=$(date +%s)
+
+grab_final_time() {
+    elapsed_time=$(( final_timestamp - init_timestamp ))
+    elapsed_mins=$(( elapsed_time / 60 ))
+    elapsed_secs=$(( elapsed_time % 60 ))
+    final_time="${elapsed_mins}:${elapsed_secs}"
+}
+
 err_msg() {
     echo -e "\033[31m[ X ]\033[0m $1"
 }
@@ -8,6 +18,16 @@ yes_msg() {
     echo -e "\033[0;32m[:::]\033[0m $1"
 }
 
+write_log_pass() {
+    grab_final_time
+    echo "[ $PKG_NAME ]: Build PASS in $final_time" >> "${REPO_POOL}/repobuild.log"
+}
+
+write_log_fail() {
+    grab_final_time
+    echo "[ $PKG_NAME ]: Build FAILED at $final_time during $fail_step" >>"${REPO_POOL}/repobuild.log"
+}
+    
 
 # Grab root perms so we can fetch whatever deps we need from pacman
 
@@ -36,7 +56,10 @@ fi
 
 SHELLTON_PATH="$(realpath "$1")"
 if [ ! -f "$SHELLTON_PATH" ]; then
+    fail_step="Finding Shellton."
     err_msg "Couldn't locate Shellton file at $SHELLTON_PATH"
+    final_timestamp=$(date +%s)
+    write_log_fail
     exit 1
 fi
 
@@ -59,11 +82,6 @@ if [ -v DEV_DEBUG ]; then
     echo "-------------"
 fi
     
-if [ -v FLAG_OOD ]; then
-    err_msg "Package flagged Out of Date!"
-    exit 1
-fi
-
 if [ -v FLAG_BROKEN ]; then
     err_msg "Packaged flagged as broken!"
     exit 1
@@ -113,6 +131,9 @@ if [ ! -d "$SRC_PATH" ]; then
     fi
     if ! curl --output /dev/null --silent --head --fail --location "$PKG_URL"; then
 	err_msg "Failed to grab from PKG_URL. Please double-check upstream URL."
+	final_timestamp=$(date +%s)
+	fail_step="Fetching PKG_URL."
+	write_log_fail
 	exit 1
     fi
     if [ -v FLAG_APPIMAGE ] || [ -v FLAG_PREPACKAGED ]; then
@@ -167,8 +188,10 @@ if [ -v FLAG_SYSPACKAGE ]; then
     build
     BLD_PASS=$?
     if [ $BLD_PASS -ne 0 ]; then
-	err_msg "Build failed! Adding to fail_reports.txt"
-	echo "[ X ] - $PKG_NAME - $(date '+$Y/%m/%d %-I:%M%P %Z')"
+	err_msg "Build failed!"
+	fail_step="Bulding Package."
+	final_timestamp=$(date +%s)
+	write_log_fail
     else
 	yes_msg "Build succeeded!"
     fi
@@ -186,6 +209,8 @@ if [ -v FLAG_SYSPACKAGE ]; then
     yes_msg "Compressing Syspackage..."
     tar -czf "${PKG_WORK_DIR}/${PKG_FULLNAME}.syspackage" -C "$(dirname "$PKG_WORK_DIR")" "${PKG_DEST_DIR}" -C "$PKG_WORK_DIR" "${PKG_NAME}.meta"
     cp "${PKG_WORK_DIR}/${PKG_FULLNAME}.syspackage" "${REPO_POOL}/${PKG_FULLNAME}.syspackage"
+    final_timestamp=$(date +%s)
+    write_log_pass
     exit 0
 fi
 
