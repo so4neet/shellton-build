@@ -245,6 +245,7 @@ fi
 if [ -v FLAG_LIB ]; then
     yes_msg "Building library $PKG_NAME..."
     cd "$SRC_PATH"
+    build
     BLD_PASS=$?
     if [ $BLD_PASS -ne 0 ]; then
 	err_msg "Build failed!"
