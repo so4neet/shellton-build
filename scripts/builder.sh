@@ -147,11 +147,16 @@ fi
 # If pre-packaged, extract
 
 if [ -v FLAG_PREPACKAGED ]; then
-    yes_msg "Extracting packaged source..."    
-    tar -xf "$SRC_PATH" --one-top-level="${SRC_PATH}.tmp" --strip-components 1
-    rm -f "$SRC_PATH"
-    mv "${SRC_PATH}.tmp" "$SRC_PATH"
+    if [ -d "$SRC_PATH" ]; then
+	yes_msg "Skipping extraction due to cached source..."
+    elif [ -f "$SRC_PATH" ]; then
+	yes_msg "Extracting packaged source..."    
+	tar -xf "$SRC_PATH" --one-top-level="${SRC_PATH}.tmp" --strip-components 1
+	rm -f "$SRC_PATH"
+	mv "${SRC_PATH}.tmp" "$SRC_PATH"
+    fi
 fi
+
 
 
 # If SYSPACKAGE, build
