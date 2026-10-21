@@ -20,6 +20,8 @@ case $yn in
 	;;
 esac
 
+# Reset log
+rm -f "/srv/shellton/repository/final/repobuild.log"
 
 # See how many packages there are
 while IFS= read -r file; do
