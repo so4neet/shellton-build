@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-
 init_timestamp=$(date +%s)
 
 grab_final_time() {
@@ -28,15 +27,6 @@ write_log_fail() {
     echo "[ $PKG_NAME ]: Build FAILED at $final_time during $fail_step" >>"${REPO_POOL}/repobuild.log"
 }
     
-
-# Grab root perms so we can fetch whatever deps we need from pacman
-
-#if [ "$EUID" -ne 0 ]; then
-#    PREV_USER="$(whoami)"
-#    echo "Escalating to root..."
-#    exec sudo bash "$(realpath "$0")" "$@"
-#fi
-
 set -eo pipefail
 
 # Paths
@@ -96,10 +86,11 @@ PKG_FULLNAME="${PKG_NAME}-${PKG_VER}-lira"
 PKG_WORK_DIR="${WORK_DIR}/${PKG_FULLNAME}"
 PKG_DEST_DIR="${PKG_WORK_DIR}/dest"
 SRC_CACHEDIR="${BLDR_ROOT}/source"
+SYSLIB_PATH="${BLDR_ROOT}/syslib"
 
 # Create the working directories
 
-mkdir -p "$PKG_WORK_DIR" "$PKG_DEST_DIR" "$SRC_CACHEDIR" "$REPO_POOL"
+mkdir -p "$PKG_WORK_DIR" "$PKG_DEST_DIR" "$SRC_CACHEDIR" "$REPO_POOL" "$SYSLIB_PATH"
 
 # Copy over the Shellton file so the sandbox can see it
 
@@ -186,9 +177,9 @@ fi
 
 
 
-# If SYSPACKAGE, build
+# If COREPACKAGE, build
 
-if [ -v FLAG_SYSPACKAGE ]; then
+if [ -v FLAG_COREPACKAGE ]; then
     yes_msg "Building $PKG_NAME..."
     cd "$SRC_PATH"
     build
@@ -207,22 +198,76 @@ if [ -v FLAG_SYSPACKAGE ]; then
 	exit 0
     fi
     
-    # If FLAG_SYSPACKAGE_INSTALL_ROOT, then package as such
-    if [ -v FLAG_SYSPACKAGE_INSTALL_ROOT ]; then
-	echo "FLAG_SYSPACKAGE_INSTALL_ROOT" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
-    fi
-    
     echo "PKG_NAME=$PKG_NAME" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
     echo "PKG_PRETTY=$PKG_PRETTY" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
     echo "PKG_DESC=$PKG_DESC" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
     echo "PKG_VER=$PKG_VER" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
     echo "PKG_CHKSUM=WIP" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
-    yes_msg "Compressing Syspackage..."
-    tar -czf "${PKG_WORK_DIR}/${PKG_FULLNAME}.syspackage" -C "$PKG_DEST_DIR" . -C "$PKG_WORK_DIR" "${PKG_NAME}.meta"
-    cp "${PKG_WORK_DIR}/${PKG_FULLNAME}.syspackage" "${REPO_POOL}/${PKG_FULLNAME}.syspackage"
+    yes_msg "Compressing Corepackage..."
+    tar -czf "${PKG_WORK_DIR}/${PKG_FULLNAME}.corepackage" -C "$PKG_DEST_DIR" . -C "$PKG_WORK_DIR" "${PKG_NAME}.meta"
+    cp "${PKG_WORK_DIR}/${PKG_FULLNAME}.corepackage" "${REPO_POOL}/${PKG_FULLNAME}.syspackage"
     final_timestamp=$(date +%s)
     write_log_pass
     exit 0
 fi
 
     
+# If SYSPACKAGE, build
+
+if [ -v FLAG_SYSPACKAGE ]; then
+    yes_msg "Building $PKG_NAME..."
+    cd "$SRC_PATH"
+    build
+    BLD_PASS=$?
+    if [ $BLD_PASS -ne 0 ]; then
+	err_msg "Build failed!"
+	fail_step="Building package"
+	final_timestamp=$(date +%s)
+	write_log_fail
+    else
+	yes_msg "Build succeeded!"
+    fi
+
+    echo "PKG_NAME=$PKG_NAME" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
+    echo "PKG_PRETTY=$PKG_PRETTY" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
+    echo "PKG_DESC=$PKG_DESC" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
+    echo "PKG_VER=$PKG_VER" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
+
+    yes_msg "Beginning packaging step..."
+	
+    
+    yes_msg "Compressing Syspackage..."
+    tar -I 'zstd --ultra -22' -cf "${PKG_WORK_DIR}/${PKG_FULLNAME}.syspackage" -C "$PKG_DEST_DIR" . -C "$PKG_WORK_DIR"
+# UNFINISHED
+
+fi
+
+if [ -v FLAG_LIB ]; then
+    yes_msg "Building library $PKG_NAME..."
+    cd "$SRC_PATH"
+    BLD_PASS=$?
+    if [ $BLD_PASS -ne 0 ]; then
+	err_msg "Build failed!"
+	fail_step="Building Library"
+	final_timestamp=$(date +%s)
+	write_log_fail
+    else
+	yes_msg "Build succeeded!"
+    fi
+
+    mkdir -p "${SYSLIB_PATH}/lib" "${SYSLIB_PATH}/include"
+
+    find "$PKG_DEST_DIR" -type d \( -name "include" -o -name "lib" \) | while read -r dir; do
+	if [[ "$dir" == */include ]]; then
+	    cp -a "$dir"/.* "${SYSLIB_PATH}/include/" 2>/dev/null || cp -a "$dir"/* "${SYSLIB_PATH}/include/" 2>/dev/null || true
+	elif [[ "$dir" == */lib ]]; then
+	    cp -a "$dir"/.* "${SYSLIB_PATH}/lib/" 2>/dev/null || cp -a "$dir"/* "${SYSLIB_PATH}/include/" 2>/dev/null || true
+	fi
+    done
+
+    yes_msg "Registered $PKG_NAME into syslibs"
+    final_timestamp=$(date +%s)
+    write_log_pass
+    exit 0
+fi
+
