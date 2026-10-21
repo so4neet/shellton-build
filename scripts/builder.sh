@@ -248,14 +248,13 @@ if [ -v FLAG_SYSPACKAGE ]; then
 
     find "$dest_bin" "$dest_libexec" -type f 2>/dev/null | while read -r binary; do
 	if ! readelf -h "$binary" >/dev/null 2>&1; then continue; fi
-
 	yes_msg "    > Checking $(basename "$binary")"
 
 	readelf -d "$binary" 2>/dev/null | grep NEEDED | awk -F'[' '{print $2}' | tr -d ']' | while read -r lib; do
 	    case "$lib" in
 		libc.so*|libm.so*|libdl.so*|libpthread.so*|librt.so*|ld-linux*.so*) continue ;; # Skip all system level libs
 	    esac
-	    lib_path=$(find "$SYSLIB_PATH/lib" -name "$lib" -type -f | head -n 1)
+	    lib_path=$(find "$SYSLIB_PATH/lib" -name "$lib" -type f | head -n 1)
 
 	    if [ -n "$lib_path" ] && [ -f "$lib_path" ]; then
 	        if [ ! -f "$dest_lib/$(basename "$lib_path")" ]; then
