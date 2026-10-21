@@ -258,7 +258,7 @@ if [ -v FLAG_LIB ]; then
 
     mkdir -p "${SYSLIB_PATH}/lib" "${SYSLIB_PATH}/include"
 
-    find "$PKG_DEST_DIR" -type d \( -name "include" -o -name "lib" \) | while read -r dir; do
+    find "$PKG_DEST_DIR" -type d \( -name "include" -o -name "lib" -o -name "lib64" \) | while read -r dir; do
 	if [[ "$dir" == */include ]]; then
 	    cp -a "$dir"/.* "${SYSLIB_PATH}/include/" 2>/dev/null || cp -a "$dir"/* "${SYSLIB_PATH}/include/" 2>/dev/null || true
 	elif [[ "$dir" == */lib ]]; then
