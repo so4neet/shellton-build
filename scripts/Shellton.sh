@@ -39,15 +39,16 @@ while IFS= read -r file; do
     bash "${SHELLTON_LOCATION}/updater.sh" "${file}"
     ec=$?
     if [ $ec -eq 12 ]; then
-	echo "Placing [ $tmp_pkg_name ] in update queue to be rebuilt..."
-	echo "${file}" >> "${REPO_LOCATION}/.UPDATE_QUEUE"
+	echo "$tmp_pkg_name will have its version number bumped."
+	echo "${file}" >> "${REPO_LOCATION}/.BLD_QUEUE"
     fi
     if [ $ec -eq 10 ]; then
-	echo "No updates for [ $tmp_pkg_name ], skipping..."
+	echo "No updates for [ $tmp_pkg_name ]"
+	echo "${file}" >> "${REPO_LOCATION}/.BLD_QUEUE"
     fi
     if [ -f "${REPO_LOCATION}/.FORCEBUILD" ]; then
 	echo "!! Force Build Enabled, building all packages !!"
-	echo "${file}" >> "${REPO_LOCATION}/.UPDATE_QUEUE"
+	echo "${file}" >> "${REPO_LOCATION}/.BLD_QUEUE"
     fi
     
 done < <(find "${REPO_LOCATION}" -type f -name "*.shellton")
@@ -56,4 +57,4 @@ echo "Finished checking packages, running build queue..."
 
 while IFS= read -r buildjob; do
     bash ${SHELLTON_LOCATION}/builder.sh "$buildjob"
-done < "${REPO_LOCATION}/.UPDATE_QUEUE"
+done < "${REPO_LOCATION}/.BLD_QUEUE"
