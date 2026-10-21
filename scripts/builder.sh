@@ -189,6 +189,7 @@ if [ -v FLAG_COREPACKAGE ]; then
 	fail_step="Bulding Package."
 	final_timestamp=$(date +%s)
 	write_log_fail
+	exit 1
     else
 	yes_msg "Build succeeded!"
     fi
@@ -206,8 +207,10 @@ if [ -v FLAG_COREPACKAGE ]; then
     yes_msg "Compressing Corepackage..."
     tar -czf "${PKG_WORK_DIR}/${PKG_FULLNAME}.corepackage" -C "$PKG_DEST_DIR" . -C "$PKG_WORK_DIR" "${PKG_NAME}.meta"
     cp "${PKG_WORK_DIR}/${PKG_FULLNAME}.corepackage" "${REPO_POOL}/${PKG_FULLNAME}.syspackage"
+    yes_msg "Sucessfully built corepackage for $PKG_NAME! Cleaning up..."
     final_timestamp=$(date +%s)
     write_log_pass
+    sudo rm -rf "${SRC_PATH}" "${PKG_WORK_DIR}"
     exit 0
 fi
 
@@ -217,6 +220,8 @@ fi
 if [ -v FLAG_SYSPACKAGE ]; then
     yes_msg "Building $PKG_NAME..."
     cd "$SRC_PATH"
+    export CFLAGS="-I${SYSLIB_PATH}/include"
+    export LDFLAGS="-L${SYSLIB_PATH}/lib -Wl,-rpath,'\$ORIGIN/../lib' -Wl,--disable-new-dtags"
     build
     BLD_PASS=$?
     if [ $BLD_PASS -ne 0 ]; then
@@ -224,6 +229,7 @@ if [ -v FLAG_SYSPACKAGE ]; then
 	fail_step="Building package"
 	final_timestamp=$(date +%s)
 	write_log_fail
+	exit 1
     else
 	yes_msg "Build succeeded!"
     fi
@@ -233,13 +239,55 @@ if [ -v FLAG_SYSPACKAGE ]; then
     echo "PKG_DESC=$PKG_DESC" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
     echo "PKG_VER=$PKG_VER" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
 
-    yes_msg "Beginning packaging step..."
-	
-    
-    yes_msg "Compressing Syspackage..."
-    tar -I 'zstd --ultra -22' -cf "${PKG_WORK_DIR}/${PKG_FULLNAME}.syspackage" -C "$PKG_DEST_DIR" . -C "$PKG_WORK_DIR"
-# UNFINISHED
+    yes_msg "Fetching dependencies..."
+    dest_bin="${PKG_DEST_DIR}/opt/syspackages/${PKG_NAME}-${PKG_VER}/bin"
+    dest_lib="${PKG_DEST_DIR}/opt/syspackages/${PKG_NAME}-${PKG_VER}/lib"
+    dest_libexec="${PKG_DEST_DIR}/opt/syspackages/${PKG_NAME}-${PKG_VER}/lib/${PKG_NAME}"
 
+    mkdir -p "$dest_lib"
+
+    find "$dest_bin" "$dest_libexec" -type f 2>/dev/null | while read -r binary; do
+	if ! readelf -h "$binary" >/dev/null 2>&1; then continue; fi
+
+	yes_msg "    > Checking $(basename "$binary")"
+
+	readelf -d "$binary" 2>/dev/null | grep NEEDED | awk -F'[' '{print $2}' | tr -d ']' | while read -r lib; do
+	    case "$lib" in
+		libc.so*|libm.so*|libdl.so*|libpthread.so*|librt.so*|ld-linux*.so*) continue ;; # Skip all system level libs
+	    esac
+	    lib_path=$(find "$SYSLIB_PATH/lib" -name "$lib" -type -f | head -n 1)
+
+	    if [ -n "$lib_path" ] && [ -f "$lib_path" ]; then
+	        if [ ! -f "$dest_lib/$(basename "$lib_path")" ]; then
+		    yes_msg "    * Bundling $lib ($lib_path)"
+		    cp -P "$lib_path" "$dest_lib/"
+		    [ -L "$lib_path" ] && cp -P "$(readlink -f "$lib_path")" "$dest_lib/"
+		fi
+	    else
+		err_msg "    [ X ] Couldn't find dependency '$lib' in syslib"
+		fail_step="Fetch dependency from syslib"
+		final_timestamp=$(date +%s)
+		write_log_fail
+		exit 1
+	    fi
+	done
+	yes_msg "Patching binary..."
+	patchelf --set-rpath '$ORIGIN/../lib' --disable-new-dtags "$binary" 2>/dev/null || patchelf --set-rpath '$ORIGIN/../../lib' --disable-new-dtags "$binary" 2>/dev/null || true
+    done
+    # Patch libs as well so they can locate each other locally (if needed)
+    if [ -d "$dest_lib" ]; then
+	find "$dest_lib" -name "*.so" -type f | while read -r so_file; do
+	    patchelf --set-rpath '$ORIGIN' --disable-new-dtags "$so_file" 2>/dev/null || true
+	done
+    fi  
+    yes_msg "Compressing Syspackage..."
+    tar -I 'zstd --ultra -22' -cf "${PKG_WORK_DIR}/${PKG_FULLNAME}.syspackage" -C "$PKG_DEST_DIR" .
+    cp "${PKG_WORK_DIR}/${PKG_FULLNAME}.syspackage" "${REPO_POOL}/${PKG_FULLNAME}.syspackage"
+    yes_msg "Sucessfully built syspackage for ${PKG_NAME}! Cleaning up..."
+    final_timestamp=$(date +%s)
+    write_log_pass
+    sudo rm -rf "${SRC_DIR}" "${PKG_WORK_DIR}"
+    exit 0
 fi
 
 if [ -v FLAG_LIB ]; then
@@ -252,6 +300,7 @@ if [ -v FLAG_LIB ]; then
 	fail_step="Building Library"
 	final_timestamp=$(date +%s)
 	write_log_fail
+	exit 1
     else
 	yes_msg "Build succeeded!"
     fi
@@ -268,9 +317,10 @@ if [ -v FLAG_LIB ]; then
 	fi
     done
 
-    yes_msg "Registered $PKG_NAME into syslibs"
+    yes_msg "Registered $PKG_NAME into syslibs, cleaning up..."
     final_timestamp=$(date +%s)
     write_log_pass
+    sudo rm -rf "${SRC_DIR}" "${PKG_WORK_DIR}"
     exit 0
 fi
 
