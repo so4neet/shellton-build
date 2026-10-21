@@ -254,7 +254,7 @@ if [ -v FLAG_SYSPACKAGE ]; then
 	    case "$lib" in
 		libc.so*|libm.so*|libdl.so*|libpthread.so*|librt.so*|ld-linux*.so*) continue ;; # Skip all system level libs
 	    esac
-	    lib_path=$(find "$SYSLIB_PATH/lib" -name "$lib" -type f | head -n 1)
+	    lib_path=$(find "$SYSLIB_PATH/lib" -name "$lib" \( -type f -o -type l \) | head -n 1)
 
 	    if [ -n "$lib_path" ] && [ -f "$lib_path" ]; then
 	        if [ ! -f "$dest_lib/$(basename "$lib_path")" ]; then
