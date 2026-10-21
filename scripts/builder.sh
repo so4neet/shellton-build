@@ -262,7 +262,9 @@ if [ -v FLAG_LIB ]; then
 	if [[ "$dir" == */include ]]; then
 	    cp -a "$dir"/.* "${SYSLIB_PATH}/include/" 2>/dev/null || cp -a "$dir"/* "${SYSLIB_PATH}/include/" 2>/dev/null || true
 	elif [[ "$dir" == */lib ]]; then
-	    cp -a "$dir"/.* "${SYSLIB_PATH}/lib/" 2>/dev/null || cp -a "$dir"/* "${SYSLIB_PATH}/include/" 2>/dev/null || true
+	    cp -a "$dir"/.* "${SYSLIB_PATH}/lib/" 2>/dev/null || cp -a "$dir"/* "${SYSLIB_PATH}/lib/" 2>/dev/null || true
+	elif [[ "$dir" == */lib64 ]]; then
+	    cp -a "$dir"/.* "${SYSLIB_PATH}/lib64/" 2>/dev/null || cp -a "$dir"/* "${SYSLIB_PATH}/lib64" 2>/dev/null || true
 	fi
     done
 
