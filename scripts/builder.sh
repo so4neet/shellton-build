@@ -202,6 +202,11 @@ if [ -v FLAG_SYSPACKAGE ]; then
 	yes_msg "Build succeeded!"
     fi
 
+    if [ -v FLAG_LIRA_LOWLEVEL ]; then
+	cp "${PKG_DEST_DIR}/${PKG_NAME}.syspackage" "${REPO_POOL}/"
+	exit 0
+    fi
+    
     # If FLAG_SYSPACKAGE_INSTALL_ROOT, then package as such
     if [ -v FLAG_SYSPACKAGE_INSTALL_ROOT ]; then
 	echo "FLAG_SYSPACKAGE_INSTALL_ROOT" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
