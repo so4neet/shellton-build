@@ -221,7 +221,7 @@ if [ -v FLAG_SYSPACKAGE ]; then
     yes_msg "Building $PKG_NAME..."
     cd "$SRC_PATH"
     export CFLAGS="-I${SYSLIB_PATH}/include"
-    export LDFLAGS="-L${SYSLIB_PATH}/lib -Wl,-rpath,'\$ORIGIN/../lib' -Wl,--disable-new-dtags"
+    export LDFLAGS='-L'"${SYSLIB_PATH}"'/lib -Wl,-rpath,\$ORIGIN/../lib -Wl,--disable-new-dtags'
     build
     BLD_PASS=$?
     if [ $BLD_PASS -ne 0 ]; then
