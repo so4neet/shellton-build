@@ -32,9 +32,8 @@ set -eo pipefail
 # Paths
 
 BLDR_ROOT="/srv/shellton"
-REPO_DIR="${BLDR_ROOT}/repo"
 WORK_DIR="${BLDR_ROOT}/working"
-REPO_POOL="${BLDR_ROOT}/repository/final"
+REPO_POOL="${BLDR_ROOT}/repository"
 
 # This needs a file input, so error if not
 if [ "$#" -ne 1 ]; then
