@@ -272,13 +272,15 @@ if [ -v FLAG_SYSPACKAGE ]; then
 	yes_msg "Patching binary..."
 	case "$binary" in
 	    "$dest_bin"/*)      rpath='$ORIGIN/../lib' ;;
-	    "$dest_libexec"/*)  rpath='$ORIGIN/../../lib' ;;
+	    "$dest_libexec"/*)  rpath='$ORIGIN/../..' ;;
+	    *) continue ;;
 	esac
 	patchelf --set-rpath "$rpath" --disable-new-dtags "$binary"
     done
     # Patch libs as well so they can locate each other locally (if needed)
     if [ -d "$dest_lib" ]; then
 	find "$dest_lib" -name "*.so" -type f | while read -r so_file; do
+	    if ! readelf -h "$binary" >/dev/null 2>&1; then continue; fi
 	    patchelf --set-rpath '$ORIGIN' --disable-new-dtags "$so_file" 2>/dev/null || true
 	done
     fi  
