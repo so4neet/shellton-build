@@ -273,6 +273,8 @@ if [ -v FLAG_SYSPACKAGE ]; then
 	case "$binary" in
 	    "$dest_bin"/*)      rpath='$ORIGIN/../lib' ;;
 	    "$dest_libexec"/*)  rpath='$ORIGIN/../../lib' ;;
+	esac
+	
     done
     # Patch libs as well so they can locate each other locally (if needed)
     if [ -d "$dest_lib" ]; then
