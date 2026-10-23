@@ -220,7 +220,7 @@ if [ -v FLAG_SYSPACKAGE ]; then
     yes_msg "Building $PKG_NAME..."
     cd "$SRC_PATH"
     export CFLAGS="-I${SYSLIB_PATH}/include"
-    export LDFLAGS="-L${SYSLIB_PATH}/lib -Wl,-rpath,\$$ORIGIN/../lib -Wl,--disable-new-dtags"
+    export LDFLAGS="-L${SYSLIB_PATH}/lib"
     build
     BLD_PASS=$?
     if [ $BLD_PASS -ne 0 ]; then
@@ -270,7 +270,9 @@ if [ -v FLAG_SYSPACKAGE ]; then
 	    fi
 	done
 	yes_msg "Patching binary..."
-	patchelf --set-rpath '$ORIGIN/../lib' --disable-new-dtags "$binary" 2>/dev/null || patchelf --set-rpath '$ORIGIN/../../lib' --disable-new-dtags "$binary" 2>/dev/null || true
+	case "$binary" in
+	    "$dest_bin"/*)      rpath='$ORIGIN/../lib' ;;
+	    "$dest_libexec"/*)  rpath='$ORIGIN/../../lib' ;;
     done
     # Patch libs as well so they can locate each other locally (if needed)
     if [ -d "$dest_lib" ]; then
@@ -284,7 +286,7 @@ if [ -v FLAG_SYSPACKAGE ]; then
     yes_msg "Sucessfully built syspackage for ${PKG_NAME}! Cleaning up..."
     final_timestamp=$(date +%s)
     write_log_pass
-    sudo rm -rf "${SRC_DIR}" "${PKG_WORK_DIR}"
+    sudo rm -rf "${SRC_PATH}" "${PKG_WORK_DIR}"
     exit 0
 fi
 
@@ -318,7 +320,7 @@ if [ -v FLAG_LIB ]; then
     yes_msg "Registered $PKG_NAME into syslibs, cleaning up..."
     final_timestamp=$(date +%s)
     write_log_pass
-    sudo rm -rf "${SRC_DIR}" "${PKG_WORK_DIR}"
+    sudo rm -rf "${SRC_PATH}" "${PKG_WORK_DIR}"
     exit 0
 fi
 
