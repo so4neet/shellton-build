@@ -14,7 +14,7 @@ if [ ${#queued_shelltons[@]} -eq 0 ]; then
     exit 1
 fi
 
-echo "[ ::: ] Starting dynamic build queue for ${#queued_shelltons[@] packages contained in $REPO_DIR..."
+echo "[ ::: ] Starting dynamic build queue for ${#queued_shelltons[@]} packages contained in $REPO_DIR..."
 echo ""
 echo "5 Second grace period..."
 sleep 5
