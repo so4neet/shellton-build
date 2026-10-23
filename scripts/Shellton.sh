@@ -1,64 +1,52 @@
 #!/usr/bin/env bash
+set -eo pipefail
 
-# The Shellton Build System - Seth McArthur, 2026
+REPO_DIR="$(cat ../repos/shellton.repo)"
+SCRIPTS_DIR="$(pwd)"
 
-# Create Build Queue
+declare -a queued_shelltons=()
+while IFS= read -r -d '' shellton; do
+    queued_shelltons+=("$shellton")
+done < <(find "$REPO_DIR" -name "*.shellton" -type f -print0)
 
-SHELLTON_LOCATION=$(pwd)
-REPO_LOCATION=$(cat ../repos/shellton.repo)
-PKGCOUNT=0
+if [ ${#queued_shelltons[@]} -eq 0 ]; then
+    echo "[X] No shelltons found in $REPO_DIR!"
+    exit 1
+fi
 
-cd "$REPO_LOCATION"
+echo "[ ::: ] Starting dynamic build queue for ${#queued_shelltons[@] packages contained in $REPO_DIR..."
+echo ""
+echo "5 Second grace period..."
+sleep 5
 
-read -p "Clear build queue? (y\n)" yn
+while [ ${#queued_shelltons[@]} -gt 0 ]; do
+    progress_made=0
+    declare -a next_remaining=()
 
-case $yn in
-    [yY] )
-	rm -f "${REPO_LOCATION}/.BLD_QUEUE"
-	;;
-    [nN] )
-	;;
-esac
+    for shellton in "${queued_shelltons[@]}"; do
+	pkg_basename=$(basename "$shellton")
+	echo "[ ::: ] Evaluating: $pkg_basename ($recipe)"
+	
+	if bash "$SCRIPTS_DIR/builder.sh $shellton"; then
+	    progress_made=1
+	    echo "[ ::: ] Completed / Skipped: $pkg_basename"
+	else
+	    next_remaining+=("$shellton")
+	fi
+    done
 
-# Reset log
-rm -f "/srv/shellton/repository/final/repobuild.log"
-
-# See how many packages there are
-while IFS= read -r file; do
-    tmp_pkg_name=$(basename "$file" .shellton)
-    echo "Found Package [ $tmp_pkg_name ]"
-    ((PKGCOUNT++))
-done < <(find . -type f -name "*.shellton")
-
-echo "$PKGCOUNT Packages found in REPO: $REPO_LOCATION"
-
-echo "Searching for package updates..."
-
-while IFS= read -r file; do
-    tmp_pkg_name=$(basename "$file" .shellton)
-    bash "${SHELLTON_LOCATION}/updater.sh" "${file}"
-    ec=$?
-    if [ $ec -eq 12 ]; then
-	echo "$tmp_pkg_name will have its version number bumped."
-	echo "${file}" >> "${REPO_LOCATION}/.BLD_QUEUE"
+    if [ $progress_made -eq 0 ]; then
+	echo ""
+	echo "[X] - Build Init Fail: Missing or Circular Dependency"
+	for r in "${next_remaining[@]}"; do
+	    echo "    - $(basename "$r") ($r)"
+	done
+	exit 1
     fi
-    if [ $ec -eq 10 ]; then
-	echo "No updates for [ $tmp_pkg_name ]"
-	echo "${file}" >> "${REPO_LOCATION}/.BLD_QUEUE"
-    fi
-    if [ -f "${REPO_LOCATION}/.FORCEBUILD" ]; then
-	echo "!! Force Build Enabled, building all packages !!"
-	echo "${file}" >> "${REPO_LOCATION}/.BLD_QUEUE"
-    fi
-    
-done < <(find "${REPO_LOCATION}" -type f -name "*.shellton")
 
-echo "Finished checking packages, running build queue..."
+    queued_shelltons=("${next_remaining[@]}")
+done
 
-while IFS= read -r buildjob; do
-    echo "_________________________________________"
-    echo "$buildjob"
-    echo "_________________________________________"
-    echo ""
-    bash ${SHELLTON_LOCATION}/builder.sh "$buildjob"
-done < "${REPO_LOCATION}/.BLD_QUEUE"
+echo ""
+echo "[ ::: ] Build complete!"
+
