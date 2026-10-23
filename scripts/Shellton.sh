@@ -39,7 +39,7 @@ while [ ${#queued_shelltons[@]} -gt 0 ]; do
 	echo ""
 	echo "[X] - Build Init Fail: Missing or Circular Dependency"
 	for r in "${next_remaining[@]}"; do
-	    echo "    - $(basename $r) ($r)"
+	    echo "    - ($r)"
 	done
 	exit 1
     fi
