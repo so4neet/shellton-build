@@ -25,9 +25,9 @@ while [ ${#queued_shelltons[@]} -gt 0 ]; do
 
     for shellton in "${queued_shelltons[@]}"; do
 	pkg_basename=$(basename "$shellton")
-	echo "[ ::: ] Evaluating: $pkg_basename ($recipe)"
+	echo "[ ::: ] Evaluating: $pkg_basename ($shellton)"
 	
-	if bash "$SCRIPTS_DIR/builder.sh $shellton"; then
+	if bash "$SCRIPTS_DIR/builder.sh" "$shellton"; then
 	    progress_made=1
 	    echo "[ ::: ] Completed / Skipped: $pkg_basename"
 	else
