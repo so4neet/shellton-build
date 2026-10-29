@@ -300,6 +300,13 @@ fi
 
 if [ -v FLAG_LIB ]; then
     yes_msg "Building library $PKG_NAME..."
+    if [ -f "${SYSLIB_PATH}/.${PKG_NAME}" ]; then
+	alr_built=$(cat "${SYSLIB_PATH}/.${PKG_NAME}")
+	if [ "$alr_built" = "$PKG_VER" ]; then
+	    yes_msg "Already built dependency and no updates found, skipping..."
+	    exit 0
+	fi
+    fi
     cd "$SRC_PATH"
     build
     BLD_PASS=$?
@@ -324,7 +331,7 @@ if [ -v FLAG_LIB ]; then
 	    cp -a "$dir"/.* "${SYSLIB_PATH}/lib64/" 2>/dev/null || cp -a "$dir"/* "${SYSLIB_PATH}/lib64" 2>/dev/null || true
 	fi
     done
-
+    echo "$PKG_VER" > "${SYSLIB_PATH}/.${PKG_NAME}"
     yes_msg "Registered $PKG_NAME into syslibs, cleaning up..."
     final_timestamp=$(date +%s)
     write_log_pass
