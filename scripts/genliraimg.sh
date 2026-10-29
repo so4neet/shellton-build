@@ -45,7 +45,7 @@ sudo chmod 1777 "$MOUNT_DIR/tmp"
 # 7. Populate RootFS exclusively from Shellton Repository packages
 echo "[:::] Populating rootfs from Lira OS repository packages..."
 if [ -d "$REPO_DIR" ]; then
-    for pkg_file in "$REPO_DIR"/*; do
+    for pkg_file in "$REPO_DIR"/*.syspackage; do
         if [ -f "$pkg_file" ]; then
             echo "[:::] Installing package: $(basename "$pkg_file")"
             sudo tar --no-same-owner -I 'zstd' -xf "$pkg_file" -C "$MOUNT_DIR"
