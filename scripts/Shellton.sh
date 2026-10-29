@@ -1,52 +1,104 @@
 #!/usr/bin/env bash
+
+err_msg() {
+    echo -e "\033[31m[ X ]\033[0m $1"
+}
+
+yes_msg() {
+    echo -e "\033[0;32m[:::]\033[0m $1"
+}
+
+warn_msg() {
+    echo -e "\033[33m[ ! ]\033[0m $1"
+}
+
+
 set -eo pipefail
 
-REPO_DIR="$(cat ../repos/shellton.repo)"
-SCRIPTS_DIR="$(pwd)"
+BLDR_ROOT="/srv/shellton"
+REPO_DIR=$(cat ../repos/shellton.repo)
 
-declare -a queued_shelltons=()
+yes_msg "Using repository: $REPO_DIR"
+
+declare -A SHELLTON_MAP=()
+declare -A DEPENDS_MAP=() # -> BUILD_DEPENDS
+ALL_PKGS=()
+
 while IFS= read -r -d '' shellton; do
-    queued_shelltons+=("$shellton")
-done < <(find "$REPO_DIR" -name "*.shellton" -type f -print0)
+    eval $(
+	unset PKG_NAME PKG_PRETTY PKG_DESC PKG_VER PKG_URL BUILD_DEPENDS FLAG_GIT FLAG_COREPACKAGE FLAG_LIB FLAG_SYSPACKAGE FLAG_APPIMAGE FLAG_PREPACKAGED
+	source "$shellton"
+	if [ -n "${PKG_NAME:-}" ]; then
+	    echo "extracted_name=\"$PKG_NAME\""
+	    echo "extracted_deps=\"${BUILD_DEPENDS:-}\""
+	fi
+    )
+    if [ -n "${extracted_name:-}" ]; then
+	SHELLTON_MAP["$extracted_name"]="$shellton"
+	DEPENDS_MAP["$extracted_name"]="$extracted_deps"
+	ALL_PACKAGES+=("$extracted_name")
+	echo "  -> Discovered package: $extracted_name ($shellton)"
+    fi
+done < <(find "$REPO_DIR" -type f -name "*.shellton" -print0)
 
-if [ ${#queued_shelltons[@]} -eq 0 ]; then
-    echo "[X] No shelltons found in $REPO_DIR!"
-    exit 1
+if [ ${#ALL_PACKAGES[@] -eq 0 ]; then
+   err_msg "No valid .shellton files found in $REPO_DIR"
+   exit 1
 fi
 
-echo "[ ::: ] Starting dynamic build queue for ${#queued_shelltons[@]} packages contained in $REPO_DIR..."
-echo ""
-echo "5 Second grace period..."
-sleep 5
+declare -A STATE=() # 0 = unvisited, 1 = visiting (cycles), 2 = visited
+BUILD_ORDER=()
 
-while [ ${#queued_shelltons[@]} -gt 0 ]; do
-    progress_made=0
-    declare -a next_remaining=()
+visit() {
+    local pkg="$1"
 
-    for shellton in "${queued_shelltons[@]}"; do
-	pkg_basename=$(basename "$shellton")
-	echo "[ ::: ] Evaluating: $pkg_basename ($shellton)"
-	
-	if bash "$SCRIPTS_DIR/builder.sh" "$shellton"; then
-	    progress_made=1
-	    echo "[ ::: ] Completed / Skipped: $pkg_basename"
-	else
-	    next_remaining+=("$shellton")
-	fi
-    done
-
-    if [ $progress_made -eq 0 ]; then
-	echo ""
-	echo "[X] - Build Init Fail: Missing or Circular Dependency"
-	for r in "${next_remaining[@]}"; do
-	    echo "    - ($r)"
-	done
+    if [ "${STATE[$pkg]:-0}" -eq 2 ]; then
+	return 0
+    fi
+    
+    if [ "${STATE[$pkg]:-0}" -eq 1 ]; then
+	err_msg "Circular dependency detected involving package: $pkg"
 	exit 1
     fi
 
-    queued_shelltons=("${next_remaining[@]}")
+    STATE[$pkg]=1
+
+    local deps="${DEPENDS_MAP[$pkg]:-}"
+    for dep in $deps; do
+	if [ -n "${RECIPE_MAP[$dep]:-}" ]; then
+	    visit "$dep"
+	else
+	    warn_msg "Dependency '$dep' requested by '$pkg' not found in repo recipes (assumed external)."
+	fi
+    done
+
+    STATE[$pkg]=2
+    BUILD_ORDER+=("$pkg")
+}
+
+yes_msg "Resolving global build order..."
+for pkg in "${ALL_PACKAGES[@]}"; do
+    visit "$pkg"
 done
 
 echo ""
-echo "[ ::: ] Build complete!"
+yes_msg "Resolved build queue:"
+for i in "${!BUILD_ORDER[@]}"; do
+    yes_msg "  $((i+1)). ${BUILD_ORDER[$1]}"
+done
 
+echo ""
+yes_msg "Starting automated build for $REPO_DIR"
+
+for pkg in "${BUILD_ORDER[@]}"; do
+    shellton="${SHELLTON_MAP[$pkg]}"
+    echo "=================================================="
+    echo " Shellton: $shellton"
+    echo " Logging to /srv/shellton/logs/$pkg.log"
+    echo "=================================================="
+
+    ./builder.sh "$shellton" > /srv/shellton/logs/$pkg.log 2>&1
+    echo ""
+done
+
+yes_msg "Finished automated build for $REPO_DIR"
