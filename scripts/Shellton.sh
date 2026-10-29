@@ -41,11 +41,6 @@ while IFS= read -r -d '' shellton; do
     fi
 done < <(find "$REPO_DIR" -type f -name "*.shellton" -print0)
 
-if [ ${#ALL_PACKAGES[@] -eq 0 ]; then
-   err_msg "No valid .shellton files found in $REPO_DIR"
-   exit 1
-fi
-
 declare -A STATE=() # 0 = unvisited, 1 = visiting (cycles), 2 = visited
 BUILD_ORDER=()
 
