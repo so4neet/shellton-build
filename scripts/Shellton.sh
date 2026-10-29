@@ -60,7 +60,7 @@ visit() {
 
     local deps="${DEPENDS_MAP[$pkg]:-}"
     for dep in $deps; do
-	if [ -n "${RECIPE_MAP[$dep]:-}" ]; then
+	if [ -n "${SHELLTON_MAP[$dep]:-}" ]; then
 	    visit "$dep"
 	else
 	    warn_msg "Dependency '$dep' requested by '$pkg' not found in repo recipes (assumed external)."
@@ -79,7 +79,7 @@ done
 echo ""
 yes_msg "Resolved build queue:"
 for i in "${!BUILD_ORDER[@]}"; do
-    yes_msg "  $((i+1)). ${BUILD_ORDER[$1]}"
+    yes_msg "  $((i+1)). ${BUILD_ORDER[$i]}"
 done
 
 echo ""
