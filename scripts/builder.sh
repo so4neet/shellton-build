@@ -288,7 +288,7 @@ if [ -v FLAG_SYSPACKAGE ]; then
     echo "PKG_PRETTY=$PKG_PRETTY" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
     echo "PKG_DESC=$PKG_DESC" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
     echo "PKG_VER=$PKG_VER" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
-    echo "PKG_CHKSUM=$(sha512sum ${PKG_WORK_DIR}/${PKG_FULLNAME}.corepackage | head -c 128)" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
+    echo "PKG_CHKSUM=$(sha512sum ${PKG_WORK_DIR}/${PKG_FULLNAME}.syspackage | head -c 128)" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
     cp "${PKG_WORK_DIR}/${PKG_FULLNAME}.syspackage" "${REPO_POOL}/${PKG_FULLNAME}.syspackage"
     cp "${PKG_WORK_DIR}/${PKG_NAME}.meta" "${META_POOL}/${PKG_NAME}.meta"
     yes_msg "Sucessfully built syspackage for ${PKG_NAME}! Cleaning up..."
