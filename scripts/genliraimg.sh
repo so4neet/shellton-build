@@ -1,12 +1,12 @@
 #!/bin/bash
 set -e
 
-IMAGE_SIZE_MB=512
+IMAGE_SIZE_MB=1024
 REPO_DIR="/srv/shellton/repository"
 BUILD_DIR="/srv/shellton/lira_os_core"
 MOUNT_DIR="$BUILD_DIR/mnt"
 IMAGE_NAME="$BUILD_DIR/lira_os_core.img"
-echo "[:::] Initializing Lira OS Self-Contained Image Builder..."
+echo "[:::] Initializing Lira OS Image Builder..."
 
 # 1. Prepare Workspace
 sudo rm -rf "$BUILD_DIR"
@@ -18,9 +18,9 @@ dd if=/dev/zero of="$IMAGE_NAME" bs=1M count="$IMAGE_SIZE_MB"
 # 3. Partition with GPT (ESP + Root)
 parted --script "$IMAGE_NAME" \
     mklabel gpt \
-    mkpart ESP fat32 1MiB 513MiB \
+    mkpart ESP fat32 1MiB 257MiB \
     set 1 esp on \
-    mkpart root ext4 513MiB 100%
+    mkpart root ext4 257MiB 100%
 
 # 4. Setup Loop Device
 LOOP_DEV=$(sudo losetup --find --show --partscan "$IMAGE_NAME")
