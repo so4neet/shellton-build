@@ -48,7 +48,7 @@ if [ -d "$REPO_DIR" ]; then
     for pkg_file in "$REPO_DIR"/*; do
         if [ -f "$pkg_file" ]; then
             echo "[:::] Installing package: $(basename "$pkg_file")"
-            sudo tar -I 'zstd' -xf "$pkg_file" -C "$MOUNT_DIR"
+            sudo tar --no-same-owner -I 'zstd' -xf "$pkg_file" -C "$MOUNT_DIR"
         fi
     done
 else
