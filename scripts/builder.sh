@@ -34,6 +34,7 @@ set -eo pipefail
 BLDR_ROOT="/srv/shellton"
 WORK_DIR="${BLDR_ROOT}/working"
 REPO_POOL="${BLDR_ROOT}/repository"
+META_POOL="${BLDR_ROOT}/meta"
 
 # This needs a file input, so error if not
 if [ "$#" -ne 1 ]; then
@@ -150,14 +151,15 @@ fi
 if [ -v FLAG_APPIMAGE ]; then
     yes_msg "Bundling AppImage..."
     cp "$SRC_PATH" "$PKG_WORK_DIR"
+    yes_msg "Compressing Bundle..."
+    tar -czf "${PKG_WORK_DIR}/${PKG_FULLNAME}.bundle" -C "$(dirname "$SRC_PATH")" "$(basename "$SRC_PATH")"
     echo "PKG_NAME=$PKG_NAME" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
     echo "PKG_PRETTY=$PKG_PRETTY" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
     echo "PKG_DESC=$PKG_DESC" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
     echo "PKG_VER=$PKG_VER" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
-    echo "PKG_CHKSUM=$(sha256sum $SRC_PATH | head -c 64)" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
-    yes_msg "Compressing Bundle..."
-    tar -czf "${PKG_WORK_DIR}/${PKG_FULLNAME}.bundle" -C "$(dirname "$SRC_PATH")" "$(basename "$SRC_PATH")" -C "$PKG_WORK_DIR" "${PKG_NAME}.meta"
+    echo "PKG_CHKSUM=$(sha512sum $SRC_PATH | head -c 128)" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
     cp "${PKG_WORK_DIR}/${PKG_FULLNAME}.bundle" "${REPO_POOL}/${PKG_FULLNAME}.bundle"
+    cp "${PKG_WORK_DIR}/${PKG_NAME}.bundle" "${META_POOL}/${PKG_NAME}.meta"
     exit 0
 fi
 
@@ -197,15 +199,16 @@ if [ -v FLAG_COREPACKAGE ]; then
 	cp "${PKG_DEST_DIR}/${PKG_NAME}.syspackage" "${REPO_POOL}/"
 	exit 0
     fi
-    
+   
+    yes_msg "Compressing Corepackage..."
+    tar -czf "${PKG_WORK_DIR}/${PKG_FULLNAME}.corepackage" -C "$PKG_DEST_DIR" . 
     echo "PKG_NAME=$PKG_NAME" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
     echo "PKG_PRETTY=$PKG_PRETTY" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
     echo "PKG_DESC=$PKG_DESC" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
     echo "PKG_VER=$PKG_VER" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
-    echo "PKG_CHKSUM=WIP" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
-    yes_msg "Compressing Corepackage..."
-    tar -czf "${PKG_WORK_DIR}/${PKG_FULLNAME}.corepackage" -C "$PKG_DEST_DIR" . -C "$PKG_WORK_DIR" "${PKG_NAME}.meta"
+    echo "PKG_CHKSUM=$(sha512sum ${PKG_WORK_DIR}/${PKG_FULLNAME}.corepackage | head -c 128)" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
     cp "${PKG_WORK_DIR}/${PKG_FULLNAME}.corepackage" "${REPO_POOL}/${PKG_FULLNAME}.syspackage"
+    cp "${PKG_WORK_DIR}/${PKG_NAME}.meta" "${META_POOL}/${PKG_NAME}.meta"
     yes_msg "Sucessfully built corepackage for $PKG_NAME! Cleaning up..."
     final_timestamp=$(date +%s)
     write_log_pass
@@ -232,12 +235,7 @@ if [ -v FLAG_SYSPACKAGE ]; then
     else
 	yes_msg "Build succeeded!"
     fi
-
-    echo "PKG_NAME=$PKG_NAME" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
-    echo "PKG_PRETTY=$PKG_PRETTY" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
-    echo "PKG_DESC=$PKG_DESC" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
-    echo "PKG_VER=$PKG_VER" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
-
+    
     yes_msg "Fetching dependencies..."
     dest_bin="${PKG_DEST_DIR}/opt/syspackages/${PKG_NAME}-${PKG_VER}/bin"
     dest_lib="${PKG_DEST_DIR}/opt/syspackages/${PKG_NAME}-${PKG_VER}/lib"
@@ -286,7 +284,13 @@ if [ -v FLAG_SYSPACKAGE ]; then
     fi  
     yes_msg "Compressing Syspackage..."
     tar -I 'zstd --ultra -22' -cf "${PKG_WORK_DIR}/${PKG_FULLNAME}.syspackage" -C "$PKG_DEST_DIR" .
+    echo "PKG_NAME=$PKG_NAME" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
+    echo "PKG_PRETTY=$PKG_PRETTY" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
+    echo "PKG_DESC=$PKG_DESC" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
+    echo "PKG_VER=$PKG_VER" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
+    echo "PKG_CHKSUM=$(sha512sum ${PKG_WORK_DIR}/${PKG_FULLNAME}.corepackage | head -c 128)" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
     cp "${PKG_WORK_DIR}/${PKG_FULLNAME}.syspackage" "${REPO_POOL}/${PKG_FULLNAME}.syspackage"
+    cp "${PKG_WORK_DIR}/${PKG_NAME}.meta" "${META_POOL}/${PKG_NAME}.meta"
     yes_msg "Sucessfully built syspackage for ${PKG_NAME}! Cleaning up..."
     final_timestamp=$(date +%s)
     write_log_pass
