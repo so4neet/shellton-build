@@ -201,7 +201,7 @@ if [ -v FLAG_COREPACKAGE ]; then
     fi
    
     yes_msg "Compressing Corepackage..."
-    env -u LD_LIBRARY_PATH
+    unset LD_LIBRARY_PATH
     tar -czf "${PKG_WORK_DIR}/${PKG_FULLNAME}.corepackage" -C "$PKG_DEST_DIR" . 
     echo "PKG_NAME=$PKG_NAME" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
     echo "PKG_PRETTY=$PKG_PRETTY" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
@@ -284,7 +284,7 @@ if [ -v FLAG_SYSPACKAGE ]; then
 	done
     fi  
     yes_msg "Compressing Syspackage..."
-    env -u LD_LIBRARY_PATH
+    unset -u LD_LIBRARY_PATH
     tar -I 'zstd --ultra -22' -cf "${PKG_WORK_DIR}/${PKG_FULLNAME}.syspackage" -C "$PKG_DEST_DIR" .
     echo "PKG_NAME=$PKG_NAME" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
     echo "PKG_PRETTY=$PKG_PRETTY" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
