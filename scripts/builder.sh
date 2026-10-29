@@ -100,10 +100,10 @@ yes_msg "Starting build for '${PKG_FULLNAME}'..."
 
 # Check if any dependencies need to be installed
 
-if [ -n "${BUILD_DEPENDS:-}" ]; then
-    yes_msg "Build server requires dependencies:"
-    sudo pacman -Sy --needed --noconfirm ${BUILD_DEPENDS}
-fi
+#if [ -n "${BUILD_DEPENDS:-}" ]; then
+#    yes_msg "Build server requires dependencies:"
+#    sudo pacman -Sy --needed --noconfirm ${BUILD_DEPENDS}
+#fi
 
 # Fetch source & cache it
 
