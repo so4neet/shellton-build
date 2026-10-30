@@ -89,7 +89,13 @@ fi
 
 sudo ln -sfn "$MOUNT_DIR/usr/bin" "$MOUNT_DIR/bin"
 echo "[:::] Generating initramfs"
-KERNEL_VER=$(ls "$MOUNT_DIR/usr/lib/modules" 2>/dev/null | head -n 1)
+KERNEL_VER=""
+if [ -d "$MOUNT_DIR/lib/modules" ]; then
+    KERNEL_VER=$(ls "$MOUNT_DIR/lib/modules" 2>/dev/null | head -n 1)
+fi
+if [ -z "$KERNEL_VER" ] && [ -d "$MOUNT_DIR/usr/lib/modules" ]; then
+    KERNEL_VER=$(ls "$MOUNT_DIR/usr/lib/modules" 2>/dev/null | head -n 1)
+fi
 
 if [ -z "$KERNEL_VER" ]; then
     echo "[ X ] No kernel modules found in rootfs!"
