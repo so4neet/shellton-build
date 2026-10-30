@@ -102,7 +102,7 @@ if [ -z "$KERNEL_VER" ]; then
     exit 1
 fi
 
-sudo "$MOUNT_DIR" dracut --force --sysroot "$MOUNT_DIR" --kver "$KERNEL_VER" "MOUNT_DIR/boot/initramfs.img"
+sudo dracut --force --sysroot "$MOUNT_DIR" --kver "$KERNEL_VER" "MOUNT_DIR/boot/initramfs.img"
 
 sudo chroot "$MOUNT_DIR" bash -c "
      if [ -f /boot/vmlinuz-$KERNEL_VER-lira ]; then
