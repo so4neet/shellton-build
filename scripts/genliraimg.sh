@@ -8,6 +8,18 @@ MOUNT_DIR="$BUILD_DIR/mnt"
 IMAGE_NAME="$BUILD_DIR/lira_os_core.img"
 echo "[:::] Initializing Lira OS Image Builder..."
 
+cleanup() {
+    set +e
+    sudo umount -lf "$MOUNT_DIR/boot" 2>/dev/null
+    sudo umount -lf "$MOUNT_DIR/dev" 2>/dev/null
+    sudo umount -lf "$MOUNT_DIR/proc" 2>/dev/null
+    sudo umount -lf "$MOUNT_DIR/sys" 2>/dev/null
+    sudo umount -lf "$MOUNT_DIR" 2>/dev/null
+    if [ -n "$LOOP_DEV" ]; then
+	sudo losetup -d "$LOOP_DEV" 2>/dev/null
+    fi
+}
+trap cleanup EXIT
 # 1. Prepare Workspace
 sudo rm -rf "$BUILD_DIR"
 mkdir -p "$MOUNT_DIR"
@@ -56,22 +68,32 @@ else
     exit 1
 fi
 
-# 8. Install systemd-boot using Lira OS's own built files
-echo "[:::] Installing systemd-boot from unpacked rootfs packages..."
-sudo mkdir -p "$MOUNT_DIR/boot/EFI/systemd"
-sudo mkdir -p "$MOUNT_DIR/boot/EFI/BOOT"
-sudo mkdir -p "$MOUNT_DIR/boot/loader/entries"
+echo "[:::] Binding virtual fs for installer phase..."
+sudo mount --bind /dev "$MOUNT_DIR/dev"
+sudo mount --bind /proc "$MOUNT_DIR/proc"
+sudo mount --bind /sys "$MOUNT_DIR/sys"
 
-# Locate systemd-boot EFI binary from within the extracted rootfs
-TARGET_EFI_SRC="$MOUNT_DIR/usr/lib/systemd/boot/efi/systemd-bootx64.efi"
+echo "[:::] Generating initramfs inside chroot..."
+KERNEL_VER=$(sudo chroot "$MOUNT_DIR" ls /usr/lib/modules | head -n 1)
 
-if [ -f "$TARGET_EFI_SRC" ]; then
-    sudo cp "$TARGET_EFI_SRC" "$MOUNT_DIR/boot/EFI/systemd/systemd-bootx64.efi"
-    sudo cp "$TARGET_EFI_SRC" "$MOUNT_DIR/boot/EFI/BOOT/BOOTX64.EFI"
-else
-    echo "[!] Error: systemd-bootx64.efi not found in installed packages! Ensure systemd package is built and installed."
+if [ -z "$KERNEL_VER" ]; then
+    echo "[ X ] No kernel modules found in rootfs!"
     exit 1
 fi
+
+sudo chroot "$MOUNT_DIR" dracut --force "/boot/initramfs-${KERNEL_VER}.img" "$KERNEL_VER"
+
+sudo chroot "$MOUNT_DIR" bash -c "
+     if [ -f /boot/vmlinuz-$KERNEL_VER-lira ]; then
+     	cp /boot/vmlinuz-$KERNEL_VER-lira /boot/vmlinuz
+     elif [ -f /usr/lib/modules/$KERNEL_VER/vmlinuz ]; then
+     	cp /usr/lib/modules/$KERNEL_VER/vmlinuz /boot/vmlinuz
+     fi
+"
+
+# 8. Install systemd-boot using Lira OS's own built files
+echo "[:::] Installing systemd-boot from unpacked rootfs packages..."
+sudo chroot "$MOUNT_DIR" bootctl install --path=/boot
 
 # 9. Configure systemd-boot loader entries
 sudo bash -c "cat > $MOUNT_DIR/boot/loader/loader.conf" << 'EOF'
