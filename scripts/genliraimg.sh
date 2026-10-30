@@ -114,7 +114,7 @@ sudo mount --bind "$MODULE_SRC" "/lib/modules/$KERNEL_VER"
 
 trap 'sudo umount /lib/modules/$KERNEL_VER 2>/dev/null; cleanup' EXIT
 
-sudo dracut --force --filesystems "ext4 vfat" --add-drivers "ext4 simpledrm drm" "$MOUNT_DIR/boot/initramfs.img" "$KERNEL_VER"
+sudo dracut --force --no-hostonly --filesystems "ext4 vfat" --add-drivers "virtio_blk virtio_pci ahci sd_mod ext4 simpledrm drm" "$MOUNT_DIR/boot/initramfs.img" "$KERNEL_VER"
 
 if [ -f "$MOUNT_DIR/boot/vmlinuz-$KERNEL_VER-lira" ]; then
    sudo cp "$MOUNT_DIR/boot/vmlinuz-$KERNEL_VER-lira" "$MOUNT_DIR/boot/vmlinuz"
