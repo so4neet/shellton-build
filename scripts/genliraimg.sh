@@ -109,7 +109,7 @@ sudo mount --bind "$MODULE_SRC" "/lib/modules/$KERNEL_VER"
 
 trap 'sudo umount /lib/modules/$KERNEL_VER 2>/dev/null; cleanup' EXIT
 
-sudo dracut --force "MOUNT_DIR/boot/initramfs.img" "$KERNEL_VER"
+sudo dracut --force "$MOUNT_DIR/boot/initramfs.img" "$KERNEL_VER"
 
 sudo chroot "$MOUNT_DIR" bash -c "
      if [ -f /boot/vmlinuz-$KERNEL_VER-lira ]; then
