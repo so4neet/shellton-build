@@ -10,7 +10,7 @@ if declare -F update >/dev/null; then
     update
     if [ -v "$FLAG_OOD" ]; then
 	echo -e "\033[31m[ !!! ]\033[0m $PKG_NAME needs updated \033[31m[ !!! ]\033[0m"
-	touch "$BLDR_ROOT/updates/.$PKG_NAME"
+	touch "/srv/shellton/updates/.$PKG_NAME"
     fi
     exit 0
 fi
