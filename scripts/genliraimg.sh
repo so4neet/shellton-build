@@ -92,9 +92,11 @@ echo "[:::] Generating initramfs"
 KERNEL_VER=""
 if [ -d "$MOUNT_DIR/lib/modules" ]; then
     KERNEL_VER=$(ls "$MOUNT_DIR/lib/modules" 2>/dev/null | head -n 1)
+    [ -n "$KERNEL_VER" ] && MODULE_SRC="$MOUNT_DIR/lib/modules/$KERNEL_VER"
 fi
 if [ -z "$KERNEL_VER" ] && [ -d "$MOUNT_DIR/usr/lib/modules" ]; then
     KERNEL_VER=$(ls "$MOUNT_DIR/usr/lib/modules" 2>/dev/null | head -n 1)
+    [ -n "KERNEL_VER" ] && MODULE_SRC="$MOUNT_DIR/usr/lib/modules/$KERNEL_VER"
 fi
 
 if [ -z "$KERNEL_VER" ]; then
@@ -102,7 +104,12 @@ if [ -z "$KERNEL_VER" ]; then
     exit 1
 fi
 
-sudo dracut --force --sysroot "$MOUNT_DIR" --kver "$KERNEL_VER" "MOUNT_DIR/boot/initramfs.img"
+sudo mkdir -p "/lib/modules/$KERNEL_VER"
+sudo mount --bind "$MODULE_SRC" "/lib/modules/$KERNEL_VER"
+
+trap 'sudo umount /lib/modules/$KERNEL_VER 2>/dev/null; cleanup' EXIT
+
+sudo dracut --force "MOUNT_DIR/boot/initramfs.img" "$KERNEL_VER"
 
 sudo chroot "$MOUNT_DIR" bash -c "
      if [ -f /boot/vmlinuz-$KERNEL_VER-lira ]; then
