@@ -51,7 +51,7 @@ sudo mkdir -p "$MOUNT_DIR/boot"
 sudo mount "$ESP_PART" "$MOUNT_DIR/boot"
 
 # Rootfs directory skeleton
-sudo mkdir -p "$MOUNT_DIR"/{dev,proc,sys,etc,opt/syspackages,opt/spkg,root,home,tmp}
+sudo mkdir -p "$MOUNT_DIR"/{dev,proc,sys,etc,opt/syspackages,opt/spkg,root,home,tmp,usr/bin}
 sudo chmod 1777 "$MOUNT_DIR/tmp"
 
 # 7. Populate RootFS exclusively from Shellton Repository packages
@@ -79,7 +79,7 @@ if [ -d "$MOUNT_DIR/opt/syspackages" ]; then
 	    for bin_file in "$pkg_dir/bin"/*; do
 		if [ -f "$bin_file" ] && [ -x "$bin_file" ]; then
 		    bin_name=$(basename "$bin_file")
-		    sudo ln -sf "/opt/syspackages/$pkg_name/bin/$bin_name" "$MOUNT_DIR/bin/$bin_name"
+		    sudo ln -sf "/opt/syspackages/$pkg_name/bin/$bin_name" "$MOUNT_DIR/usr/bin/$bin_name"
 		    echo "  -> Linked: /bin/$bin_name -> /opt/syspackages/$pkg_name/bin/$bin_name"
 		fi
 	    done
@@ -87,7 +87,7 @@ if [ -d "$MOUNT_DIR/opt/syspackages" ]; then
     done
 fi
 
-
+sudo ln -sfn usr/bin "$MOUNT_DIR/bin"
 echo "[:::] Binding virtual fs for installer phase..."
 sudo mount --bind /dev "$MOUNT_DIR/dev"
 sudo mount --bind /proc "$MOUNT_DIR/proc"
