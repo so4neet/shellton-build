@@ -87,9 +87,9 @@ if [ -d "$MOUNT_DIR/opt/syspackages" ]; then
     done
 fi
 
-sudo ln -sfn "$MOUNT_DIR/usr/bin" "$MOUNT_DIR/bin"
-sudo ln -sfn "$MOUNT_DIR/usr/sbin" "$MOUNT_DIR/sbin"
-sudo ln -sfn "$MOUNT_DIR/usr/lib/systemd/systemd" "$MOUNT_DIR/sbin/init"
+sudo ln -sfn usr/bin "$MOUNT_DIR/bin"
+sudo ln -sfn usr/sbin "$MOUNT_DIR/sbin"
+sudo ln -sfn /usr/lib/systemd/systemd "$MOUNT_DIR/sbin/init"
 
 echo "[:::] Generating initramfs"
 KERNEL_VER=""
