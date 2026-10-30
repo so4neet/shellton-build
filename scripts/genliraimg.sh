@@ -89,7 +89,7 @@ fi
 
 sudo ln -sfn usr/bin "$MOUNT_DIR/bin"
 sudo ln -sfn usr/sbin "$MOUNT_DIR/bin"
-sudo ln -sfn /usr/lib/systemd/systemd "$MOUNT_DIR/bin/init"
+sudo ln -sfn /usr/lib/systemd/systemd "$MOUNT_DIR/usr/bin/init"
 sudo ln -sfn /usr/lib/systemd/system/getty@.service "$MOUNT_DIR/etc/systemd/system/getty.target.wants/getty@tty1.service"
 
 echo "[:::] Generating initramfs"
@@ -137,7 +137,7 @@ sudo bash -c "cat > $MOUNT_DIR/boot/loader/entries/lira.conf" << EOF
 title   Lira OS
 linux   /vmlinuz
 initrd  /initramfs.img
-options root=UUID=$ROOT_UUID rw console=tty0 rd.shell rd.debug
+options root=UUID=$ROOT_UUID rw console=tty0 console=ttyS0,115200n8 rd.shell rd.debug
 EOF
 
 # 10. Finalize and Unmount
