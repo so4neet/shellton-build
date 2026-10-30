@@ -68,6 +68,26 @@ else
     exit 1
 fi
 
+echo "[:::] Symlinking step..."
+
+if [ -d "$MOUNT_DIR/opt/syspackages" ]; then
+    for pkg_dir in "$MOUNT_DIR"/opt/syspackages/*; do
+	if [ -d "$pkg_dir/bin" ]; then
+	    pkg_name=$(basename "$pkg_dir")
+	    echo "[:::] Processing syspackage bin dir: $pkg_name"
+
+	    for bin_file in "$pkg_dir/bin"/*; do
+		if [ -f "$bin_file" ] && [ -x "$bin_file" ]; then
+		    bin_name=$(basename "$bin_file")
+		    sudo ln -sf "/opt/syspackages/$pkg_name/bin/$bin_name" "$MOUNT_DIR/bin/$bin_name"
+		    echo "  -> Linked: /bin/$bin_name -> /opt/syspackages/$pkg_name/bin/$bin_name"
+		fi
+	    done
+	fi
+    done
+fi
+
+
 echo "[:::] Binding virtual fs for installer phase..."
 sudo mount --bind /dev "$MOUNT_DIR/dev"
 sudo mount --bind /proc "$MOUNT_DIR/proc"
