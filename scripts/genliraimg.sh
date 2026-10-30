@@ -93,8 +93,8 @@ sudo ln -sfn usr/sbin "$MOUNT_DIR/bin"
 sudo ln -sfn /usr/lib/systemd/systemd "$MOUNT_DIR/usr/bin/init"
 sudo ln -sfn /usr/lib/systemd/system/getty@.service "$MOUNT_DIR/etc/systemd/system/getty.target.wants/getty@tty1.service"
 
-sudo chmod 600 shadow
-sudo chmod 600 gshadow
+sudo chmod 600 etc/shadow
+sudo chmod 600 etc/gshadow
 
 echo "[:::] Generating initramfs"
 KERNEL_VER=""
