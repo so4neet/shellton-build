@@ -35,6 +35,7 @@ BLDR_ROOT="/srv/shellton"
 WORK_DIR="${BLDR_ROOT}/working"
 REPO_POOL="${BLDR_ROOT}/repository"
 META_POOL="${BLDR_ROOT}/meta"
+UPDATES_DIR="${BLDR_ROOT}/updates"
 
 # This needs a file input, so error if not
 if [ "$#" -ne 1 ]; then
@@ -140,9 +141,14 @@ else
     yes_msg "Using cached: $SRC_ARCHIVE"
 fi
 
-if [ -f "${REPO_POOL}/${PKG_FULLNAME}.bundle" ] || [ -f "${REPO_POOL}/${PKG_FULLNAME}.syspackage" ]; then
+if { [ -f "${REPO_POOL}/${PKG_FULLNAME}.bundle" ] || [ -f "${REPO_POOL}/${PKG_FULLNAME}.syspackage" ]; } && [ ! -f "${UPDATES_DIR}/.${PKG_NAME}" ]; then
     yes_msg "Package already built/bundled, skipping..."
     exit 0
+fi
+
+if [ -f "${UPDATES_DIR}/.${PKG_NAME}" ]; then
+    UPDATE_REQUIRED=1
+    yes_msg "Update forced for $PKG_NAME..."
 fi
 
 
@@ -160,6 +166,9 @@ if [ -v FLAG_APPIMAGE ]; then
     echo "PKG_CHKSUM=$(sha512sum $SRC_PATH | head -c 128)" >> ${PKG_WORK_DIR}/${PKG_NAME}.meta
     cp "${PKG_WORK_DIR}/${PKG_FULLNAME}.bundle" "${REPO_POOL}/${PKG_FULLNAME}.bundle"
     cp "${PKG_WORK_DIR}/${PKG_NAME}.bundle" "${META_POOL}/${PKG_NAME}.meta"
+    if [ -v UPDATE_REQUIRED ]; then
+	rm -f "${UPDATES_DIR}/.${PKG_NAME}"
+    fi
     exit 0
 fi
 
@@ -214,6 +223,9 @@ if [ -v FLAG_COREPACKAGE ]; then
     final_timestamp=$(date +%s)
     write_log_pass
     sudo rm -rf "${SRC_PATH}" "${PKG_WORK_DIR}"
+    if [ -v UPDATE_REQUIRED ]; then
+	rm -f "${UPDATES_DIR}/.${PKG_NAME}"
+    fi
     exit 0
 fi
 
@@ -297,6 +309,9 @@ if [ -v FLAG_SYSPACKAGE ]; then
     final_timestamp=$(date +%s)
     write_log_pass
     sudo rm -rf "${SRC_PATH}" "${PKG_WORK_DIR}"
+    if [ -v UPDATE_REQUIRED ]; then
+	rm -f "${UPDATES_DIR}/.${PKG_NAME}"
+    fi
     exit 0
 fi
 
@@ -338,6 +353,9 @@ if [ -v FLAG_LIB ]; then
     final_timestamp=$(date +%s)
     write_log_pass
     sudo rm -rf "${SRC_PATH}" "${PKG_WORK_DIR}"
+    if [ -v UPDATE_REQUIRED ];
+       rm -f "${UPDATES_DIR}/.${PKG_NAME}"
+    fi
     exit 0
 fi
 

@@ -27,7 +27,9 @@ ALL_PKGS=()
 while IFS= read -r -d '' shellton; do
     eval $(
 	unset PKG_NAME PKG_PRETTY PKG_DESC PKG_VER PKG_URL BUILD_DEPENDS FLAG_GIT FLAG_COREPACKAGE FLAG_LIB FLAG_SYSPACKAGE FLAG_APPIMAGE FLAG_PREPACKAGED
+	bash updater.sh "$shellton"
 	source "$shellton"
+	
 	if [ -n "${PKG_NAME:-}" ]; then
 	    echo "extracted_name=\"$PKG_NAME\""
 	    echo "extracted_deps=\"${BUILD_DEPENDS:-}\""

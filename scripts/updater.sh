@@ -12,7 +12,7 @@ if declare -F update >/dev/null; then
     update
     if [ -v "$FLAG_OOD" ]; then
 	echo -e "\033[31m[ !!! ]\033[0m $PKG_NAME needs updated \033[31m[ !!! ]\033[0m"
-	exit 12 # Exit code for update
+	touch "$BLDR_ROOT/updates/.$PKG_NAME"
     fi
-    exit 10
+    exit 0
 fi
