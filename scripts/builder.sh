@@ -353,7 +353,7 @@ if [ -v FLAG_LIB ]; then
     final_timestamp=$(date +%s)
     write_log_pass
     sudo rm -rf "${SRC_PATH}" "${PKG_WORK_DIR}"
-    if [ -v UPDATE_REQUIRED ];
+    if [ -v UPDATE_REQUIRED ]; then
        rm -f "${UPDATES_DIR}/.${PKG_NAME}"
     fi
     exit 0
