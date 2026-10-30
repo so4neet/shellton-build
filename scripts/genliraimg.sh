@@ -87,6 +87,7 @@ if [ -d "$MOUNT_DIR/opt/syspackages" ]; then
     done
 fi
 
+sudo mkdir -p "$MOUNT_DIR/etc/systemd/system/getty.target.wants"
 sudo ln -sfn usr/bin "$MOUNT_DIR/bin"
 sudo ln -sfn usr/sbin "$MOUNT_DIR/bin"
 sudo ln -sfn /usr/lib/systemd/systemd "$MOUNT_DIR/usr/bin/init"
