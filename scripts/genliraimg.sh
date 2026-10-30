@@ -111,13 +111,12 @@ trap 'sudo umount /lib/modules/$KERNEL_VER 2>/dev/null; cleanup' EXIT
 
 sudo dracut --force "$MOUNT_DIR/boot/initramfs.img" "$KERNEL_VER"
 
-sudo chroot "$MOUNT_DIR" bash -c "
-     if [ -f /boot/vmlinuz-$KERNEL_VER-lira ]; then
-     	cp /boot/vmlinuz-$KERNEL_VER-lira /boot/vmlinuz
-     elif [ -f /usr/lib/modules/$KERNEL_VER/vmlinuz ]; then
-     	cp /usr/lib/modules/$KERNEL_VER/vmlinuz /boot/vmlinuz
-     fi
-"
+if [ -f "$MOUNT_DIR/boot/vmlinuz-$KERNEL_VER-lira" ]; then
+   cp "$MOUNT_DIR/boot/vmlinuz-$KERNEL_VER-lira" "$MOUNT_DIR/boot/vmlinuz"
+elif [ -f "$MOUNT_DIR/usr/lib/modules/$KERNEL_VER/vmlinuz" ]; then
+   cp "$MOUNT_DIR/usr/lib/modules/$KERNEL_VER/vmlinuz" "$MOUNT_DIR/boot/vmlinuz"
+fi
+
 
 # 8. Install systemd-boot using Lira OS's own built files
 echo "[:::] Installing systemd-boot from unpacked rootfs packages..."
