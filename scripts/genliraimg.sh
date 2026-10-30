@@ -88,6 +88,9 @@ if [ -d "$MOUNT_DIR/opt/syspackages" ]; then
 fi
 
 sudo ln -sfn "$MOUNT_DIR/usr/bin" "$MOUNT_DIR/bin"
+sudo ln -sfn "$MOUNT_DIR/usr/sbin" "$MOUNT_DIR/sbin"
+sudo ln -sfn "$MOUNT_DIR/usr/lib/systemd/systemd" "$MOUNT_DIR/sbin/init"
+
 echo "[:::] Generating initramfs"
 KERNEL_VER=""
 if [ -d "$MOUNT_DIR/lib/modules" ]; then
@@ -109,7 +112,7 @@ sudo mount --bind "$MODULE_SRC" "/lib/modules/$KERNEL_VER"
 
 trap 'sudo umount /lib/modules/$KERNEL_VER 2>/dev/null; cleanup' EXIT
 
-sudo dracut --force "$MOUNT_DIR/boot/initramfs.img" "$KERNEL_VER"
+sudo dracut --force --filesystems "ext4 vfat" --add-drivers "ext4" "$MOUNT_DIR/boot/initramfs.img" "$KERNEL_VER"
 
 if [ -f "$MOUNT_DIR/boot/vmlinuz-$KERNEL_VER-lira" ]; then
    sudo cp "$MOUNT_DIR/boot/vmlinuz-$KERNEL_VER-lira" "$MOUNT_DIR/boot/vmlinuz"
