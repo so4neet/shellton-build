@@ -80,28 +80,23 @@ if [ -d "$MOUNT_DIR/opt/syspackages" ]; then
 		if [ -f "$bin_file" ] && [ -x "$bin_file" ]; then
 		    bin_name=$(basename "$bin_file")
 		    sudo ln -sf "/opt/syspackages/$pkg_name/bin/$bin_name" "$MOUNT_DIR/usr/bin/$bin_name"
-		    echo "  -> Linked: /bin/$bin_name -> /opt/syspackages/$pkg_name/bin/$bin_name"
+		    echo "  -> Linked: /usr/bin/$bin_name -> /opt/syspackages/$pkg_name/bin/$bin_name"
 		fi
 	    done
 	fi
     done
 fi
 
-sudo ln -sfn usr/bin "$MOUNT_DIR/bin"
-echo "[:::] Binding virtual fs for installer phase..."
-sudo mount --bind /dev "$MOUNT_DIR/dev"
-sudo mount --bind /proc "$MOUNT_DIR/proc"
-sudo mount --bind /sys "$MOUNT_DIR/sys"
-
-echo "[:::] Generating initramfs inside chroot..."
-KERNEL_VER=$(sudo chroot "$MOUNT_DIR" ls /usr/lib/modules | head -n 1)
+sudo ln -sfn "$MOUNT_DIR/usr/bin" "$MOUNT_DIR/bin"
+echo "[:::] Generating initramfs"
+KERNEL_VER=$(ls "$MOUNT_DIR/usr/lib/modules" 2>/dev/null | head -n 1)
 
 if [ -z "$KERNEL_VER" ]; then
     echo "[ X ] No kernel modules found in rootfs!"
     exit 1
 fi
 
-sudo chroot "$MOUNT_DIR" dracut --force "/boot/initramfs-${KERNEL_VER}.img" "$KERNEL_VER"
+sudo "$MOUNT_DIR" dracut --force --sysroot "$MOUNT_DIR" --kver "$KERNEL_VER" "MOUNT_DIR/boot/initramfs.img"
 
 sudo chroot "$MOUNT_DIR" bash -c "
      if [ -f /boot/vmlinuz-$KERNEL_VER-lira ]; then
@@ -113,7 +108,7 @@ sudo chroot "$MOUNT_DIR" bash -c "
 
 # 8. Install systemd-boot using Lira OS's own built files
 echo "[:::] Installing systemd-boot from unpacked rootfs packages..."
-sudo chroot "$MOUNT_DIR" bootctl install --path=/boot
+sudo bootctl install --path="$MOUNT_DIR/boot"
 
 # 9. Configure systemd-boot loader entries
 sudo bash -c "cat > $MOUNT_DIR/boot/loader/loader.conf" << 'EOF'
