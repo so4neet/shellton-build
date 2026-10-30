@@ -51,7 +51,7 @@ sudo mkdir -p "$MOUNT_DIR/boot"
 sudo mount "$ESP_PART" "$MOUNT_DIR/boot"
 
 # Rootfs directory skeleton
-sudo mkdir -p "$MOUNT_DIR"/{dev,proc,sys,etc,opt/syspackages,opt/spkg,root,home,tmp,var/tmp,usr/bin,usr/sbin}
+sudo mkdir -p "$MOUNT_DIR"/{dev,proc,sys,etc,opt/syspackages,opt/spkg,root,home,tmp,var/tmp,usr/bin}
 sudo chmod 1777 "$MOUNT_DIR/tmp" "$MOUNT_DIR/var/tmp"
 
 # 7. Populate RootFS exclusively from Shellton Repository packages
@@ -88,8 +88,9 @@ if [ -d "$MOUNT_DIR/opt/syspackages" ]; then
 fi
 
 sudo ln -sfn usr/bin "$MOUNT_DIR/bin"
-sudo ln -sfn usr/sbin "$MOUNT_DIR/sbin"
-sudo ln -sfn /usr/lib/systemd/systemd "$MOUNT_DIR/sbin/init"
+sudo ln -sfn usr/sbin "$MOUNT_DIR/bin"
+sudo ln -sfn /usr/lib/systemd/systemd "$MOUNT_DIR/bin/init"
+sudo ln -sfn /usr/lib/systemd/system/getty@.service "$MOUNT_DIR/etc/systemd/system/getty.target.wants/getty@tty1.service"
 
 echo "[:::] Generating initramfs"
 KERNEL_VER=""
@@ -112,7 +113,7 @@ sudo mount --bind "$MODULE_SRC" "/lib/modules/$KERNEL_VER"
 
 trap 'sudo umount /lib/modules/$KERNEL_VER 2>/dev/null; cleanup' EXIT
 
-sudo dracut --force --filesystems "ext4 vfat" --add-drivers "ext4" "$MOUNT_DIR/boot/initramfs.img" "$KERNEL_VER"
+sudo dracut --force --filesystems "ext4 vfat" --add-drivers "ext4 simpledrm drm" "$MOUNT_DIR/boot/initramfs.img" "$KERNEL_VER"
 
 if [ -f "$MOUNT_DIR/boot/vmlinuz-$KERNEL_VER-lira" ]; then
    sudo cp "$MOUNT_DIR/boot/vmlinuz-$KERNEL_VER-lira" "$MOUNT_DIR/boot/vmlinuz"
@@ -136,7 +137,7 @@ sudo bash -c "cat > $MOUNT_DIR/boot/loader/entries/lira.conf" << EOF
 title   Lira OS
 linux   /vmlinuz
 initrd  /initramfs.img
-options root=UUID=$ROOT_UUID rw quiet
+options root=UUID=$ROOT_UUID rw console=tty0 rd.shell rd.debug
 EOF
 
 # 10. Finalize and Unmount
