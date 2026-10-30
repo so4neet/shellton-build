@@ -51,8 +51,8 @@ sudo mkdir -p "$MOUNT_DIR/boot"
 sudo mount "$ESP_PART" "$MOUNT_DIR/boot"
 
 # Rootfs directory skeleton
-sudo mkdir -p "$MOUNT_DIR"/{dev,proc,sys,etc,opt/syspackages,opt/spkg,root,home,tmp,usr/bin}
-sudo chmod 1777 "$MOUNT_DIR/tmp"
+sudo mkdir -p "$MOUNT_DIR"/{dev,proc,sys,etc,opt/syspackages,opt/spkg,root,home,tmp,var/tmp,usr/bin}
+sudo chmod 1777 "$MOUNT_DIR/tmp" "$MOUNT_DIR/var/tmp"
 
 # 7. Populate RootFS exclusively from Shellton Repository packages
 echo "[:::] Populating rootfs from Lira OS repository packages..."
