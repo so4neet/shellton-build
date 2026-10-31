@@ -280,11 +280,11 @@ if [ -v FLAG_LIB ]; then
     if [ -v FLAG_SYSLIB_ONLY ]; then
 	find "$PKG_DEST_DIR" -type d \( -name "include" -o -name "lib" -o -name "lib64" \) | while read -r dir; do
 	    if [[ "$dir" == */include ]]; then
-		cp -a "$dir"/.* "${SHELLTON_SYSLIB_DIR}/include" 2>/dev/null || cp -a "$dir"/* "${SYSLIB_PATH}/include/" 2>/dev/null || true
+		cp -a "$dir"/.* "${SHELLTON_SYSLIB_DIR}/include" 2>/dev/null || cp -a "$dir"/* "${SHELLTON_SYSLIB_DIR}/include/" 2>/dev/null || true
 	    elif [[ "$dir" == */lib ]]; then
-		cp -a "$dir"/.* "${SHELLTON_SYSLIB_DIR}/lib" 2>/dev/null || cp -a "$dir"/* "${SYSLIB_PATH}/lib/" 2>/dev/null || true
+		cp -a "$dir"/.* "${SHELLTON_SYSLIB_DIR}/lib" 2>/dev/null || cp -a "$dir"/* "${SHELLTON_SYSLIB_DIR}/lib/" 2>/dev/null || true
 	    elif [[ "$dir" == */lib64 ]]; then
-		cp -a "$dir"/.* "${SHELLTON_SYSLIB_DIR}/lib64" 2>/dev/null || cp -a "$dir"/* "${SYSLIB_PATH}/lib64/" 2>/dev/null || true
+		cp -a "$dir"/.* "${SHELLTON_SYSLIB_DIR}/lib64" 2>/dev/null || cp -a "$dir"/* "${SHELLTON_SYSLIB_DIR}/lib64/" 2>/dev/null || true
 	    fi
 	done
 	echo "$PKG_VER" > "${SHELLTON_SYSLIB_DIR}/.${PKG_NAME}"
@@ -299,16 +299,16 @@ if [ -v FLAG_LIB ]; then
     find "$PKG_DEST_DIR" -type d \( -name "include" -o -name "lib" -o -name "lib64" \) | while read -r dir; do
 	if [[ "$dir" == */include ]]; then
 	    mkdir -p "${PKG_DEST_DIR}/devinclude"
-	    cp -a "$dir"/.* "${SHELLTON_SYSLIB_DIR}/include" 2>/dev/null || cp -a "$dir"/* "${SYSLIB_PATH}/include/" 2>/dev/null || true
-	    cp -a "$dir"/.* "${PKG_DEST_DIR}/devinclude" 2>/dev/null || cp -a "$dir"/* "${PKG_DEST_DIR}/devinclude/" 2>/dev/null || true
+	    cp -a "$dir"/. "${SHELLTON_SYSLIB_DIR}/include" 2>/dev/null || cp -a "$dir"/* "${SHELLTON_SYSLIB_DIR}/include/" 2>/dev/null || true
+	    cp -a "$dir"/. "${PKG_DEST_DIR}/devinclude" 2>/dev/null || cp -a "$dir"/* "${PKG_DEST_DIR}/devinclude/" 2>/dev/null || true
 	elif [[ "$dir" == */lib ]]; then
 	    mkdir -p "${PKG_DEST_DIR}/devlib"
-	    cp -a "$dir"/.* "${SHELLTON_SYSLIB_DIR}/lib" 2>/dev/null || cp -a "$dir"/* "${SYSLIB_PATH}/lib/" 2>/dev/null || true
-	    cp -a "$dir"/.* "${SHELLTON_SYSLIB_DIR}/devlib" 2>/dev/null || cp -a "$dir"/* "${SYSLIB_PATH}/devlib/" 2>/dev/null || true
+	    cp -a "$dir"/. "${SHELLTON_SYSLIB_DIR}/lib" 2>/dev/null || cp -a "$dir"/* "${SHELLTON_SYSLIB_DIR}/lib/" 2>/dev/null || true
+	    cp -a "$dir"/. "${PKG_DEST_DIR}/devlib" 2>/dev/null || cp -a "$dir"/* "${PKG_DEST_DIR}/devlib/" 2>/dev/null || true
 	elif [[ "$dir" == */lib64 ]]; then
 	    mkdir -p "${PKG_DEST_DIR}/devlib64"
-	    cp -a "$dir"/.* "${SHELLTON_SYSLIB_DIR}/lib64" 2>/dev/null || cp -a "$dir"/* "${SYSLIB_PATH}/lib64/" 2>/dev/null || true
-	    cp -a "$dir"/.* "${SHELLTON_SYSLIB_DIR}/devlib64" 2>/dev/null || cp -a "$dir"/* "${SYSLIB_PATH}/devlib64/" 2>/dev/null || true
+	    cp -a "$dir"/. "${SHELLTON_SYSLIB_DIR}/lib64" 2>/dev/null || cp -a "$dir"/* "${SHELLTON_SYSLIB_DIR}/lib64/" 2>/dev/null || true
+	    cp -a "$dir"/. "${PKG_DEST_DIR}/devlib64" 2>/dev/null || cp -a "$dir"/* "${PKG_DEST_DIR}/devlib64/" 2>/dev/null || true
 	fi
     done
     echo "$PKG_VER" > "${SHELLTON_SYSLIB_DIR}/.${PKG_NAME}"
