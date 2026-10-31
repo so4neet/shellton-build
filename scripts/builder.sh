@@ -277,6 +277,25 @@ if [ -v FLAG_LIB ]; then
 
     mkdir -p "${SHELLTON_SYSLIB_DIR}/lib" "${SHELLTON_SYSLIB_PATH}/include"
 
+    if [ -v FLAG_SYSLIB_ONLY ]; then
+	find "$PKG_DEST_DIR" -type d \( -name "include" -o -name "lib" -o -name "lib64" \) | while read -r dir; do
+	    if [[ "$dir" == */include ]]; then
+		cp -a "$dir"/.* "${SHELLTON_SYSLIB_DIR}/include" 2>/dev/null || cp -a "$dir"/* "${SYSLIB_PATH}/include/" 2>/dev/null || true
+	    elif [[ "$dir" == */lib ]]; then
+		cp -a "$dir"/.* "${SHELLTON_SYSLIB_DIR}/lib" 2>/dev/null || cp -a "$dir"/* "${SYSLIB_PATH}/lib/" 2>/dev/null || true
+	    elif [[ "$dir" == */lib64 ]]; then
+		cp -a "$dir"/.* "${SHELLTON_SYSLIB_DIR}/lib64" 2>/dev/null || cp -a "$dir"/* "${SYSLIB_PATH}/lib64/" 2>/dev/null || true
+	    fi
+	done
+	echo "$PKG_VER" > "${SHELLTON_SYSLIB_DIR}/.${PKG_NAME}"
+	info_msg "Registered $PKG_NAME into SYSLIB"
+	write_log_pass
+	rm -rf "${SRC_PATH}" "${PKG_WORK_DIR}"
+	if [ -v UPDATE_REQUIRED ]; then
+	    rm -f "${SHELLTON_UPDATES_DIR}/.${PKG_NAME}"
+	fi
+	exit 0
+    fi
     find "$PKG_DEST_DIR" -type d \( -name "include" -o -name "lib" -o -name "lib64" \) | while read -r dir; do
 	if [[ "$dir" == */include ]]; then
 	    cp -a "$dir"/.* "${SHELLTON_SYSLIB_DIR}/include" 2>/dev/null || cp -a "$dir"/* "${SYSLIB_PATH}/include/" 2>/dev/null || true
