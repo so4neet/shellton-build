@@ -15,10 +15,9 @@ warn_msg() {
 
 set -eo pipefail
 
-BLDR_ROOT="/srv/shellton"
-REPO_DIR=$(cat ../repos/shellton.repo)
+source shellton_config
 
-yes_msg "Using repository: $REPO_DIR"
+yes_msg "Using repository: $REPO_BASENAME-$SHELLTON_ARCH"
 
 declare -A SHELLTON_MAP=()
 declare -A DEPENDS_MAP=() # -> BUILD_DEPENDS
@@ -27,7 +26,7 @@ ALL_PKGS=()
 while IFS= read -r -d '' shellton; do
     eval $(
 	unset PKG_NAME PKG_PRETTY PKG_DESC PKG_VER PKG_URL BUILD_DEPENDS FLAG_GIT FLAG_COREPACKAGE FLAG_LIB FLAG_SYSPACKAGE FLAG_APPIMAGE FLAG_PREPACKAGED
-	bash updater.sh "$shellton" >&2
+	bash scripts/updater.sh "$shellton" >&2
 	source "$shellton"
 	
 	if [ -n "${PKG_NAME:-}" ]; then
@@ -41,7 +40,7 @@ while IFS= read -r -d '' shellton; do
 	ALL_PACKAGES+=("$extracted_name")
 	echo "  -> Discovered package: $extracted_name ($shellton)"
     fi
-done < <(find "$REPO_DIR" -type f -name "*.shellton" -print0)
+done < <(find "$SHELLTON_REPOSITORY" -type f -name "*.shellton" -print0)
 
 declare -A STATE=() # 0 = unvisited, 1 = visiting (cycles), 2 = visited
 BUILD_ORDER=()
@@ -85,7 +84,7 @@ for i in "${!BUILD_ORDER[@]}"; do
 done
 
 echo ""
-yes_msg "Starting automated build for $REPO_DIR"
+yes_msg "Starting automated build for $REPO_BASENAME"
 
 for pkg in "${BUILD_ORDER[@]}"; do
     shellton="${SHELLTON_MAP[$pkg]}"
@@ -94,8 +93,8 @@ for pkg in "${BUILD_ORDER[@]}"; do
     echo " Logging to /srv/shellton/logs/$pkg.log"
     echo "=================================================="
 
-    ./builder.sh "$shellton" > /srv/shellton/logs/$pkg.log 2>&1
+    ./scripts/builder.sh "$shellton" > "$SHELLTON_LOG_DIR/$pkg.log" 2>&1
     echo ""
 done
 
-yes_msg "Finished automated build for $REPO_DIR"
+yes_msg "Finished automated build for $REPO_BASENAME"

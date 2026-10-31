@@ -1,0 +1,22 @@
+# Shellton Config File
+
+# Repository folder containing .shellton files to build
+SHELLTON_REPOSITORY=""
+REPO_BASENAME=$(basename "${SHELLTON_REPOSITORY:-default}")
+
+# What architecture to build for
+SHELLTON_ARCH="x86_64"
+
+# =====================================================
+# |  Change these only if you know what you're doing! |
+# =====================================================
+
+SHELLTON_BASE_DIR="$HOME/shellton"
+SHELLTON_BUILD_DIR="${SHELLTON_BASE_DIR}/build/${REPO_BASENAME}/${SHELLTON_ARCH}"
+SHELLTON_LOG_DIR="${SHELLTON_BASE_DIR}/${REPO_BASENAME}/${SHELLTON_ARCH}/logs"
+SHELLTON_PKG_DIR="${SHELLTON_BASE_DIR}/output/${REPO_BASENAME}/${SHELLTON_ARCH}/packages"
+SHELLTON_META_DIR="${SHELLTON_BASE_DIR}/output/${REPO_BASENAME}/${SHELLTON_ARCH}/meta"
+SHELLTON_CACHE_DIR="${SHELLTON_BUILD_DIR}/cache"
+SHELLTON_WORK_DIR="${SHELLTON_BUILD_DIR}/working"
+SHELLTON_UPDATES_DIR="${SHELLTON_BUILD_DIR}/updates"
+SHELLTON_SYSLIB_DIR="${SHELLTON_BUILD_DIR}/syslib"
