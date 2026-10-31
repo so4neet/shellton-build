@@ -19,6 +19,9 @@ source shellton_config
 
 yes_msg "Using repository: $REPO_BASENAME-$SHELLTON_ARCH"
 
+# Create directories if they don't exist
+mkdir -p "$SHELLTON_BASE_DIR" "$SHELLTON_BUILD_DIR" "$SHELLTON_LOG_DIR" "$SHELLTON_PKG_DIR" "$SHELLTON_META_DIR" "$SHELLTON_CACHE_DIR" "$SHELLTON_WORK_DIR" "$SHELLTON_UPDATES_DIR" "$SHELLTON_SYSLIB_DIR"
+
 declare -A SHELLTON_MAP=()
 declare -A DEPENDS_MAP=() # -> BUILD_DEPENDS
 ALL_PKGS=()
