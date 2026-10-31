@@ -182,8 +182,8 @@ fi
 if [ -v FLAG_SYSPACKAGE ]; then
     info_msg "Building $PKG_NAME as Syspackage..."
     cd "$SRC_PATH"
-    export CFLAGS="-I${SYSLIB_PATH}/include"
-    export LDFLAGS="-L${SYSLIB_PATH}/lib"
+    export CFLAGS="-I${SHELLTON_SYSLIB_DIR}/include"
+    export LDFLAGS="-L${SHELLTON_SYSLIB_DIR}/lib"
     build
     BLD_PASS=$?
     if [ $BLD_PASS -ne 0 ]; then
@@ -275,7 +275,7 @@ if [ -v FLAG_LIB ]; then
 	info_msg "Build OK"
     fi
 
-    mkdir -p "${SHELLTON_SYSLIB_DIR}/lib" "${SHELLTON_SYSLIB_PATH}/include"
+    mkdir -p "${SHELLTON_SYSLIB_DIR}/lib" "${SHELLTON_SYSLIB_DIR}/include"
 
     if [ -v FLAG_SYSLIB_ONLY ]; then
 	find "$PKG_DEST_DIR" -type d \( -name "include" -o -name "lib" -o -name "lib64" \) | while read -r dir; do
@@ -298,19 +298,23 @@ if [ -v FLAG_LIB ]; then
     fi
     find "$PKG_DEST_DIR" -type d \( -name "include" -o -name "lib" -o -name "lib64" \) | while read -r dir; do
 	if [[ "$dir" == */include ]]; then
+	    mkdir -p "${PKG_DEST_DIR}/devinclude"
 	    cp -a "$dir"/.* "${SHELLTON_SYSLIB_DIR}/include" 2>/dev/null || cp -a "$dir"/* "${SYSLIB_PATH}/include/" 2>/dev/null || true
 	    cp -a "$dir"/.* "${PKG_DEST_DIR}/devinclude" 2>/dev/null || cp -a "$dir"/* "${PKG_DEST_DIR}/devinclude/" 2>/dev/null || true
 	elif [[ "$dir" == */lib ]]; then
+	    mkdir -p "${PKG_DEST_DIR}/devlib"
 	    cp -a "$dir"/.* "${SHELLTON_SYSLIB_DIR}/lib" 2>/dev/null || cp -a "$dir"/* "${SYSLIB_PATH}/lib/" 2>/dev/null || true
 	    cp -a "$dir"/.* "${SHELLTON_SYSLIB_DIR}/devlib" 2>/dev/null || cp -a "$dir"/* "${SYSLIB_PATH}/devlib/" 2>/dev/null || true
 	elif [[ "$dir" == */lib64 ]]; then
+	    mkdir -p "${PKG_DEST_DIR}/devlib64"
 	    cp -a "$dir"/.* "${SHELLTON_SYSLIB_DIR}/lib64" 2>/dev/null || cp -a "$dir"/* "${SYSLIB_PATH}/lib64/" 2>/dev/null || true
 	    cp -a "$dir"/.* "${SHELLTON_SYSLIB_DIR}/devlib64" 2>/dev/null || cp -a "$dir"/* "${SYSLIB_PATH}/devlib64/" 2>/dev/null || true
 	fi
     done
     echo "$PKG_VER" > "${SHELLTON_SYSLIB_DIR}/.${PKG_NAME}"
     info_msg "Registered $PKG_NAME into SYSLIB, compressing $PKG_NAME-dev Libbundle..."
-    tar -I 'ztsd --ultra -22' -cf "${PKG_WORK_DIR}/${PKG_NAME}-dev.$PKG_VER.libbundle" -C devinclude devlib devlib64
+    INCL_LIBRARIES=$(ls "${PKG_DEST_DIR}" | grep "dev")
+    tar -I 'zstd --ultra -22' -cf "${PKG_WORK_DIR}/${PKG_NAME}-dev.$PKG_VER.libbundle" -C $INCL_LIBRARIES
     
     # Create meta and remove if it already exists
     rm -f "${SHELLTON_META_DIR}/$PKG_NAME-dev.meta"
