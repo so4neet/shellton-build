@@ -2,7 +2,7 @@
 
 # Builder rewrite following updated outlines.
 
-source shelton_config
+source shellton_config
 
 # Functions
 
@@ -10,7 +10,7 @@ stamp_time() {
     elapsed_time=$(( end_timestamp - init_timestamp ))
     elapsed_mins=$(( elapsed_time / 60 ))
     elapsed_secs=$(( elapsed_time % 60 ))
-    final_time=(printf "%02d:%02d" "$elapsed_mins" "$elapsed_secs")
+    final_time=$(printf "%02d:%02d" "$elapsed_mins" "$elapsed_secs")
 }
 
 err_msg() {
@@ -197,7 +197,7 @@ if [ -v FLAG_SYSPACKAGE ]; then
 
     info_msg "Fetching dependencies..."
     dest_bin="${PKG_DEST_DIR}/opt/syspackages/${PKG_NAME}-${PKG_VER}/bin"
-    dest_lib="${PKG_DEST_DIR}/opt/syspackages/${PKG_NAME}-${PKG_VER]/lib"
+    dest_lib="${PKG_DEST_DIR}/opt/syspackages/${PKG_NAME}-${PKG_VER}/lib"
     dest_libexec="${dest_lib}/${PKG_NAME}"
 
     mkdir -p "$dest_lib"
@@ -298,8 +298,8 @@ if [ -v FLAG_LIB ]; then
     echo "PKG_NAME=$PKG_NAME-dev" >> "${SHELLTON_META_DIR}/$PKG_NAME-dev.meta"
     echo "PKG_PRETTY=$PKG_PRETTY" >> "${SHELLTON_META_DIR}/$PKG_NAME-dev.meta"
     echo "PKG_DESC=$PKG_DESC" >> "${SHELLTON_META_DIR}/$PKG_NAME-dev.meta"
-    echo "PKG_VER=$PKG_VER" >> "${SHELLTON_META_DIR}/$PKG_NAME=dev.meta"
-    echo "PKG_CHKSUM=$(sha512sum ${PKG_WORK_DIR}/${PKG_NAME}-dev.$PKG_VER.libbunde | head -c 128)" >> "${SHELLTON_META_DIR}/$PKG_NAME-dev.meta"
+    echo "PKG_VER=$PKG_VER" >> "${SHELLTON_META_DIR}/$PKG_NAME-dev.meta"
+    echo "PKG_CHKSUM=$(sha512sum ${PKG_WORK_DIR}/${PKG_NAME}-dev.$PKG_VER.libbundle | head -c 128)" >> "${SHELLTON_META_DIR}/$PKG_NAME-dev.meta"
     cp "${PKG_WORK_DIR}/${PKG_NAME}-dev.$PKG_VER.syspackage" "${SHELLTON_PKG_DIR}/${PKG_NAME}-dev.$PKG_VER.libbundle"
     info_msg "Packaged $PKG_NAME-dev libbundle sucessfully. Cleaning up..."
     write_log_pass
