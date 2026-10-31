@@ -314,7 +314,7 @@ if [ -v FLAG_LIB ]; then
     echo "$PKG_VER" > "${SHELLTON_SYSLIB_DIR}/.${PKG_NAME}"
     info_msg "Registered $PKG_NAME into SYSLIB, compressing $PKG_NAME-dev Libbundle..."
     INCL_LIBRARIES=$(ls "${PKG_DEST_DIR}" | grep "dev")
-    tar -I 'zstd --ultra -22' -cf "${PKG_WORK_DIR}/${PKG_NAME}-dev.$PKG_VER.libbundle" -C $INCL_LIBRARIES
+    tar -I 'zstd --ultra -22' -cf "${PKG_WORK_DIR}/${PKG_NAME}-dev.$PKG_VER.libbundle" $INCL_LIBRARIES
     
     # Create meta and remove if it already exists
     rm -f "${SHELLTON_META_DIR}/$PKG_NAME-dev.meta"
