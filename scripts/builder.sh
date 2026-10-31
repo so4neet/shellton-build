@@ -323,7 +323,7 @@ if [ -v FLAG_LIB ]; then
     echo "PKG_DESC=$PKG_DESC" >> "${SHELLTON_META_DIR}/$PKG_NAME-dev.meta"
     echo "PKG_VER=$PKG_VER" >> "${SHELLTON_META_DIR}/$PKG_NAME-dev.meta"
     echo "PKG_CHKSUM=$(sha512sum ${PKG_WORK_DIR}/${PKG_NAME}-dev.$PKG_VER.libbundle | head -c 128)" >> "${SHELLTON_META_DIR}/$PKG_NAME-dev.meta"
-    cp "${PKG_WORK_DIR}/${PKG_NAME}-dev.$PKG_VER.syspackage" "${SHELLTON_PKG_DIR}/${PKG_NAME}-dev.$PKG_VER.libbundle"
+    cp "${PKG_WORK_DIR}/${PKG_NAME}-dev.$PKG_VER.libbundle" "${SHELLTON_PKG_DIR}/${PKG_NAME}-dev.$PKG_VER.libbundle"
     info_msg "Packaged $PKG_NAME-dev libbundle sucessfully. Cleaning up..."
     write_log_pass
     rm -rf "${SRC_PATH}" "${PKG_WORK_DIR}"
