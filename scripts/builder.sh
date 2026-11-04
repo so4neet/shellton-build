@@ -153,7 +153,7 @@ if [ -v FLAG_COREPACKAGE ]; then
     find "${PKG_DEST_DIR}" -type f 2>/dev/null | while read -r binary; do
 	if ! readelf -h "$binary" >/dev/null 2>&1; then continue; fi
 
-	readelf -d "$binary" >/dev/null | grep NEEDED | awk -f'[' '{print $2}' | tr -d ']' | while read -r lib; do
+	readelf -d "$binary" >/dev/null | grep NEEDED | sed 's/.*\[\(.*\)\].*/\1/' | while read -r lib; do
 	    case "$lib" in
 		libc.so*|libm.so*|libdl.so*|libpthread.so*|librt.so*|ld-linux*.so*) continue ;;
 	    esac
