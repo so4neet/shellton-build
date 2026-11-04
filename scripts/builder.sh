@@ -126,6 +126,11 @@ if [ -v FLAG_PREPACKAGED ]; then
 fi
 
 if [ -v FLAG_COREPACKAGE ]; then
+    if [ -f "${SHELLTON_PKG_DIR}/${PKG_FULLNAME}.corepackage" ] && [ ! -f "${SHELLTON_UPDATES_DIR}/.${PKG_NAME}" ]; then
+	info_msg "Already built, skipping..."
+	exit 0
+    fi
+    
     info_msg "Building $PKG_NAME as Corepackage..."
     cd "$SRC_PATH"
     build
@@ -207,6 +212,10 @@ fi
 
 if [ -v FLAG_SYSPACKAGE ]; then
     info_msg "Building $PKG_NAME as Syspackage..."
+    if [ -f "${SHELLTON_PKG_DIR}/${PKG_FULLNAME}.syspackage" ] && [ ! -f "${SHELLTON_UPDATES_DIR}/.${PKG_NAME}" ]; then
+	info_msg "Already built, skipping..."
+	exit 0
+    fi
     cd "$SRC_PATH"
     export CFLAGS="-I${SHELLTON_SYSLIB_DIR}/include"
     export LDFLAGS="-L${SHELLTON_SYSLIB_DIR}/lib"
