@@ -147,6 +147,32 @@ if [ -v FLAG_COREPACKAGE ]; then
     
     unset LD_LIBRARY_PATH # Do this so things don't break
 
+    info_msg "Bundling dependencies..."
+    mkdir -p "${PKG_DEST_DIR}/usr/lib" "${PKG_DEST_DIR}/usr/lib64"
+
+    find "${PKG_DEST_DIR}" -type f 2>/dev/null | while read -r binary; do
+	if ! readelf -h "$binary" >/dev/null 2>&1; then continue; fi
+
+	readelf -d "$binary" >/dev/null | grep NEEDED | awk -f'[' '{print $2}' | tr -d ']' | while read -r lib; do
+	    case "$lib" in
+		libc.so*|libm.so*|libdl.so*|libpthread.so*|librt.so*|ld-linux*.so*) continue ;;
+	    esac
+
+	    if [ -f "${PKG_DEST_DIR}/usr/lib/$lib" ] || [ -f "${PKG_DEST_DIR}/usr/lib64/$lib" ]; then
+		continue
+	    fi
+
+	    lib_path=$(find "${SHELLTON_SYSLIB_DIR}" -name "$lib" -type f -o -type l | head -n 1)
+
+	    if [ -n "$lib_path" ] && [ -f "$lib_path" ]; then
+		info_msg "   -> Bundling: $lib"
+		cp -P "$lib_path" "${PKG_DEST_DIR}/usr/lib/"
+		# If it's a symlink, copy target
+		[ -L "$lib_path" ] && cp -P "$(readlink -f "$lib_path")" "${PKG_DEST_DIR}/usr/lib/"
+	    fi
+	done
+    done
+    
     info_msg "Sanitizing package directories..."
 
     for stray in lib lib64 bin sbin; do
