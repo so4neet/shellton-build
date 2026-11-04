@@ -291,7 +291,7 @@ fi
 
 if [ -v FLAG_LIB ]; then
     info_msg "Building library $PKG_NAME->SYSLIB & $PKG_NAME-dev"
-    if [ -f "${SHELLTON_SYSLIB_DIR}/.${PKG_NAME}" ] && [ -f "${SHELLTON_PKG_DIR}/${PKG_FULLNAME}-dev.library" ]; then
+    if [ -f "${SHELLTON_SYSLIB_DIR}/.${PKG_NAME}" ] && [ -f "${SHELLTON_PKG_DIR}/${PKG_NAME}-dev.${PKG_VER}.libbundle" ]; then
        alr_built=$(cat "${SHELLTON_SYSLIB_DIR}/.${PKG_NAME}")
        if [ "$alr_built" = "$PKG_VER" ]; then
 	   info_msg "Already built to SYSLIB and -dev with no updates found. Skipping..."
