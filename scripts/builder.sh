@@ -156,7 +156,7 @@ if [ -v FLAG_COREPACKAGE ]; then
     mkdir -p "${PKG_DEST_DIR}/usr/lib" "${PKG_DEST_DIR}/usr/lib64"
 
     find "${PKG_DEST_DIR}" -type f 2>/dev/null | while read -r binary; do
-	if ! readelf -h "$binary" >/dev/null 2>&1; then continue; fi
+	if ! readelf -h "$binary" 2>/dev/null 2>&1; then continue; fi
 
 	readelf -d "$binary" >/dev/null | grep NEEDED | sed 's/.*\[\(.*\)\].*/\1/' | while read -r lib; do
 	    case "$lib" in
